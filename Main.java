@@ -124,6 +124,8 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		if(e.getActionCommand().equals("addMolecule")) moleculeList.add(new Molecule("Molecule", 250, 25, 20, 20, "molecule"));
 		
 		else if(e.getActionCommand().equals("addSingleBond")) moleculeList.add(new Molecule("Single Bond", 250, 25, 20, 10, "singleBond"));
+	
+		frame.requestFocus();
 	}
 
 	public static class Canvas extends JPanel {		
