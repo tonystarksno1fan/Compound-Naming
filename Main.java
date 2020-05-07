@@ -133,7 +133,8 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 			g.drawString("Press 1 to add a circle (molecule), 2 to add a rectangle (single bond, for now)", width/2 - 20, height/2);
 			g.drawString("If you put two molecules together they will move as a group, although this gets", width/2 - 20, height/2 + 60);
 			g.drawString("more unstable as the number of molecules in one group increases (I'm fiXinG iT dW)", width/2 - 20, height/2 + 80);
-			
+			g.drawString("Prob gonna add rotation and more legit connections next", width/2 - 20, height/2 + 120);
+
 			for(int i=0; i<moleculeList.size(); i++)
 				moleculeList.get(i).draw(g);
 		}
