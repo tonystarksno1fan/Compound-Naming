@@ -13,7 +13,7 @@ public class Molecule extends JPanel {
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
 
-	public Molecule[] attached = new Molecule[4];
+	public int group = -1;
 
 	public Molecule(String name, int x, int y, int width, int height, String type) {	
 		this.name = name;
@@ -58,38 +58,40 @@ public class Molecule extends JPanel {
 		Molecule temp = objectCollision(lastX, lastY);
 
 		if(temp != null) {
-			if(temp.getX()<lastX) {
-				attached[0] = temp;
-				temp.attached[2] = this;
+			if(temp.group>=0) {
+				Main.groupList.get(temp.group).add(this);
+				group = temp.group;
 			}
-			else if(temp.getY()<lastY) {
-				attached[1] = temp;
-				temp.attached[3] = this;
-			}
-			else if(temp.getX()>lastX) {
-				attached[2] = temp;
-				temp.attached[0] = this;
-			}
-			else if(temp.getY()>lastY) {
-				attached[3] = temp;
-				temp.attached[1] = this;
+			else if(temp.group<0) {
+				if(Main.groupList.size()>0) {
+					group = Main.groupList.size()-1;
+					temp.group = Main.groupList.size()-1;
+				}
+				else {
+					group = 0;
+					temp.group = 0;
+				}
+
+				Main.groupList.add(new ArrayList<Molecule>());
+
+				Main.groupList.get(group).add(this);
+				Main.groupList.get(group).add(temp);
 			}
 		}
-
-		moveGroup(new ArrayList<Molecule>(Arrays.asList(this)), dx, dy);
+		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Molecule>(Arrays.asList(this)), dx, dy);
 	}
 
-	public void moveGroup(ArrayList<Molecule> moved, int dx, int dy) {
-		for(int i=0; i<4; i++) {
-			if(attached[i] != null && !matchList(attached[i], moved)) {
-				attached[i].lastX+=dx;
-				attached[i].lastY+=dy;
-				moved.add(attached[i]);
-				attached[i].moveGroup(moved, dx, dy);
+	public void moveGroup(int move, ArrayList<Molecule> moved ,int dx, int dy) {
+		for(int i=0; i<Main.groupList.get(move).size(); i++) {
+			Molecule temp = Main.groupList.get(move).get(i);
+			if(temp != this && !matchList(temp, moved)) {
+				temp.lastX += dx;
+				temp.lastY += dy;
+				moved.add(temp);
 			}
 		}
 	}
-	
+
 	public boolean matchList(Molecule mole, ArrayList<Molecule> list) {
 		for(int i=0; i<list.size(); i++) 
 			if(mole == list.get(i)) return true;

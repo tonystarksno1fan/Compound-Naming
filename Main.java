@@ -14,6 +14,8 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		
 	//Put any and all objects you create into an ArrayList, the Canvas method will draw their contents onto the panel
 	public static ArrayList<Molecule> moleculeList = new ArrayList<Molecule>();
+	
+	public static ArrayList<ArrayList<Molecule>> groupList = new ArrayList<ArrayList<Molecule>>();
 		
 	public static JFrame frame;
 	public static final JSplitPane splitPane = new JSplitPane();
@@ -67,7 +69,7 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 			public void run() {
 				while(true) {
 						panel.repaint();
-						try {Thread.sleep(30);} catch (Exception ex) {}	//10 millisecond delay between each refresh
+						try {Thread.sleep(10);} catch (Exception ex) {}	//10 millisecond delay between each refresh
 				}
 			}
 		});			
@@ -124,7 +126,7 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		if(e.getActionCommand().equals("addMolecule")) moleculeList.add(new Molecule("Molecule", 250, 25, 20, 20, "molecule"));
 		
 		else if(e.getActionCommand().equals("addSingleBond")) moleculeList.add(new Molecule("Single Bond", 250, 25, 20, 10, "singleBond"));
-	
+		
 		frame.requestFocus();
 	}
 
@@ -135,8 +137,7 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 			g.drawString("Press 1 to add a circle (molecule), 2 to add a rectangle (single bond, for now)", width/2 - 20, height/2);
 			g.drawString("If you put two molecules together they will move as a group, although this gets", width/2 - 20, height/2 + 60);
 			g.drawString("more unstable as the number of molecules in one group increases (I'm fiXinG iT dW)", width/2 - 20, height/2 + 80);
-			g.drawString("Prob gonna add rotation and more legit connections next", width/2 - 20, height/2 + 120);
-
+			
 			for(int i=0; i<moleculeList.size(); i++)
 				moleculeList.get(i).draw(g);
 		}
