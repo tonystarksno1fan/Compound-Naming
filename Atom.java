@@ -12,6 +12,7 @@ public class Atom extends JPanel {
 	
 	//stores atoms bonded to current atom object
 	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>();
+	private int groupBonds = 0;
 
 	private String type;
 
@@ -46,8 +47,10 @@ public class Atom extends JPanel {
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
-				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY)||(lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
-					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) ||(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
+				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY)||
+						(lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
+					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) ||
+							(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
 						return temp;
 					}
 			}
@@ -125,6 +128,10 @@ public class Atom extends JPanel {
 
 	public String getName() {
 		return name;
+	}
+	
+	public int getBonds() {
+		return groupBonds;
 	}
 	
 	public Integer getElement(String name) {

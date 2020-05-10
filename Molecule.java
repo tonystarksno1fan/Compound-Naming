@@ -1,120 +1,75 @@
 import java.util.*;
-import java.awt.*;
-import javax.swing.*;
-
-public class Molecule extends JPanel {
-	private String name;	//Molecule name
-
-	private String type;
-
-	private int objectW;
-	private int objectH;
-
-	private int lastX;	//Current X value
-	private int lastY;	//Current Y value
-
-	public int group = -1;
-
-	public Molecule(String name, int x, int y, int width, int height, String type) {	
-		this.name = name;
-
-		this.type = type;
-
-		this.objectW = width;
-		this.objectH = height;
-
-		this.lastX = x;
-		this.lastY = y;
-	}
-
-	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the physics class calls to draw onto panel)
-		Graphics2D gg = (Graphics2D) g;
-
-		if(type.equalsIgnoreCase("molecule")) gg.drawOval(lastX, lastY, objectW, objectH);
-		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
-	}
-
-	public Molecule objectCollision(int lastX, int lastY) {
-		for(int i=0; i<Main.moleculeList.size(); i++) {
-			if(Main.moleculeList.get(i) != this) {
-				Molecule temp = Main.moleculeList.get(i);
-				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY)||(lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
-					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) ||(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
-						return temp;
-					}
+public class Molecule {
+	/*
+	 * only works for completely flat molecules (1D)
+	 */
+	static int longest = 0;	//length of longest carbon chain
+	public static String findType(ArrayList<Atom> arr) {
+		for (int i = 0; i < arr.size(); i++) {
+			if (arr.get(i).getName().equals("Double Bond")) {
+				return "double";
+			}
+			else if (arr.get(i).getName().equals("Triple Bond")) {
+				return "triple";
 			}
 		}
-		return null;
+		return "single";
 	}
 
-	public void updateLocation(int x, int y) {
-
-		int dx = x - lastX;
-		int dy = y - lastY;
-
-		lastX = x;
-		lastY = y;
-
-		Molecule temp = objectCollision(lastX, lastY);
-
-		if(temp != null) {
-			if(temp.group>=0) {
-				Main.groupList.get(temp.group).add(this);
-				group = temp.group;
+	//call on this method for final name of molecule
+	public static String name(ArrayList<Atom> arr) {
+		new Nomenclature();
+		String type = findType(arr);
+		String out = "";
+		if (type.equals("single")) {
+			ArrayList<Integer> indicesToCheck = findEdge(arr);
+			for (Integer i : indicesToCheck) {
+				findSingle(arr, indicesToCheck.get(i), 0);
 			}
-			else if(temp.group<0) {
-				if(Main.groupList.size()>0) {
-					group = Main.groupList.size()-1;
-					temp.group = Main.groupList.size()-1;
-				}
-				else {
-					group = 0;
-					temp.group = 0;
-				}
-
-				Main.groupList.add(new ArrayList<Molecule>());
-
-				Main.groupList.get(group).add(this);
-				Main.groupList.get(group).add(temp);
+			int c = countCarbons(arr);
+			out += Nomenclature.oPrefixes.get(c);
+			out += "ane";
+		}
+		return out;
+	}
+	
+	private static ArrayList<Integer> findEdge(ArrayList<Atom> arr) {
+		ArrayList<Integer> out = new ArrayList<>();
+		int min = arr.get(0).getBonds();	//stores minimum number of group bonds
+		for (Atom a : arr) {
+			if (a.getBonds() < min) {
+				min = a.getBonds();
 			}
 		}
-		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Molecule>(Arrays.asList(this)), dx, dy);
-	}
-
-	public void moveGroup(int move, ArrayList<Molecule> moved ,int dx, int dy) {
-		for(int i=0; i<Main.groupList.get(move).size(); i++) {
-			Molecule temp = Main.groupList.get(move).get(i);
-			if(temp != this && !matchList(temp, moved)) {
-				temp.lastX += dx;
-				temp.lastY += dy;
-				moved.add(temp);
+		for (int i = 0; i < arr.size(); i++) {
+			if (arr.get(i).getBonds() == min) {
+				out.add(i);
 			}
 		}
+		return out;
 	}
 
-	public boolean matchList(Molecule mole, ArrayList<Molecule> list) {
-		for(int i=0; i<list.size(); i++) 
-			if(mole == list.get(i)) return true;
-		return false;		
+	private static void findSingle(ArrayList<Atom> arr, int index, int counter) {
+		if (index == arr.size() || index == -1) {
+			return;
+		}
+		if (arr.get(index).getName().equals("Carbon")) {
+			counter++;
+		}
+		if (counter > longest) {
+			longest = counter;
+		}
+		findSingle(arr, index+1, counter);
+		findSingle(arr, index-1, counter);
 	}
-
-	public int getX() {
-		return lastX;
-	}
-
-	public int getY() {
-		return lastY;
-	}
-
-	public int getWidth() {
-		return objectW;
-	}
-
-	public int getHeight() {
-		return objectH;
-	}
-
-	public String getName() {
-		return name;
+	
+	private static int countCarbons(ArrayList<Atom> arr) {
+		int out = 0;
+		for (Atom a : arr) {
+			if (a.getName().equals("Carbon")) {
+				out++;
+			}
+		}
+		return out;
 	}
 }
