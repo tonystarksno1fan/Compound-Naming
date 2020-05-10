@@ -1,21 +1,24 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
-
+/*
+ * added individual buttons for carbon and hydrogen
+ */
 public class Main implements ActionListener, KeyListener, MouseListener, MouseMotionListener {
 	public static final int height = 600;	
 	public static final int width = 900;
 	
-	public static int mouseX;
+	public static int mouseX; 
 	public static int mouseY;
 	
-	public Molecule selected;
+	public Atom selected;
 		
 	//Put any and all objects you create into an ArrayList, the Canvas method will draw their contents onto the panel
-	public static ArrayList<Molecule> moleculeList = new ArrayList<Molecule>();
+	public static ArrayList<Atom> atomList = new ArrayList<Atom>();
 	
-	public static ArrayList<ArrayList<Molecule>> groupList = new ArrayList<ArrayList<Molecule>>();
+	public static ArrayList<ArrayList<Atom>> groupList = new ArrayList<ArrayList<Atom>>();
 		
 	public static JFrame frame;
 	public static final JSplitPane splitPane = new JSplitPane();
@@ -48,10 +51,28 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);		
 		
-		JButton molecule = new JButton("Molecule");
-		molecule.setActionCommand("addMolecule");
-		molecule.addActionListener(this);
-		controls.add(molecule);
+		//start of new stuff
+		JButton Carbon = new JButton ("C");
+		Carbon.setActionCommand("addCarbon");
+		Carbon.addActionListener(this);
+		Carbon.setOpaque(false);
+		Carbon.setContentAreaFilled(false);
+		Carbon.setBorderPainted(false);
+		controls.add(Carbon);
+		
+		JButton Hydrogen = new JButton ("H");
+		Hydrogen.setActionCommand("addHydrogen");
+		Hydrogen.addActionListener(this);
+		Hydrogen.setOpaque(false);
+		Hydrogen.setContentAreaFilled(false);
+		Hydrogen.setBorderPainted(false);
+		controls.add(Hydrogen);
+		//end of new stuff
+		
+		JButton Atom = new JButton("Atom");
+		Atom.setActionCommand("addAtom");
+		Atom.addActionListener(this);
+		controls.add(Atom);
 		
 		JButton singleBond = new JButton("Single Bond");
 		singleBond.setActionCommand("addSingleBond");
@@ -88,8 +109,14 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 	public void keyPressed(KeyEvent e) {}
 
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_1) moleculeList.add(new Molecule("Molecule", 250, 25, 20, 20, "molecule"));
-		else if(e.getKeyCode() == KeyEvent.VK_2) moleculeList.add(new Molecule("Single Bond", 250, 25, 20, 10, "singleBond"));
+		if(e.getKeyCode() == KeyEvent.VK_1) 
+			atomList.add(new Atom("Atom", 250, 25, 20, 20, "Atom"));
+		else if(e.getKeyCode() == KeyEvent.VK_2) 
+			atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
+		
+		for (int i = 0; i < Main.atomList.size(); i++) {
+			System.out.println(Main.atomList.get(i));
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -100,9 +127,10 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		mouseX = e.getX();
 		mouseY = e.getY();
 		
-		for(int i=0; i<moleculeList.size(); i++) {
-			Molecule temp = moleculeList.get(i);			
-			if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
+		for(int i=0; i<atomList.size(); i++) {
+			Atom temp = atomList.get(i);			
+			if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && 
+					mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
 				selected = temp;
 			}
 		}
@@ -123,10 +151,18 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 	public void mouseExited(MouseEvent e) {}
 	
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("addMolecule")) moleculeList.add(new Molecule("Molecule", 250, 25, 20, 20, "molecule"));
-		
-		else if(e.getActionCommand().equals("addSingleBond")) moleculeList.add(new Molecule("Single Bond", 250, 25, 20, 10, "singleBond"));
-		
+		if(e.getActionCommand().equals("addAtom")) {
+			atomList.add(new Atom("Atom", 250, 25, 20, 20, "Atom"));
+		}
+		else if (e.getActionCommand().equals("addCarbon")) {
+			atomList.add(new Atom("Carbon", 250, 25, 20, 20, "Atom"));
+		}
+		else if (e.getActionCommand().equals("addHydrogen")) {
+			atomList.add(new Atom("Hydrogen", 250, 25, 20, 20, "Atom"));
+		}
+		else if(e.getActionCommand().equals("addSingleBond")) {
+			atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
+		}
 		frame.requestFocus();
 	}
 
@@ -134,10 +170,14 @@ public class Main implements ActionListener, KeyListener, MouseListener, MouseMo
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
 			
-			g.drawString("Press 1 to add a circle (molecule), 2 to add a rectangle (single bond, for now)", width/2 - 20, height/2);
+			g.drawString("Press 1 to add a circle (Atom), 2 to add a rectangle (single bond, for now)", 
+					width/2 - 20, height/2);
 			
-			for(int i=0; i<moleculeList.size(); i++)
-				moleculeList.get(i).draw(g);
+			for(int i=0; i<atomList.size(); i++) {
+				atomList.get(i).draw(g);
+//				System.out.println(atomList.get(i).toString());
+			}
 		}
-	}	
+	}
+	
 }
