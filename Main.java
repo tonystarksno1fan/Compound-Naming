@@ -1,3 +1,7 @@
+/*
+	to hell with boring ass buttons
+*/
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
