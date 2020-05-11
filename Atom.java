@@ -1,5 +1,5 @@
 /*
-	overhualed GUI so it's now actually drag and drop
+	*overhualed GUI so it's now actually drag and drop
 	changed location of selection menu from top to right side
 */
 
@@ -56,7 +56,6 @@ public class Atom extends JPanel {
 	}
 
 	public void updateLocation(int x, int y) {
-
 		int dx = x - lastX;
 		int dy = y - lastY;
 
