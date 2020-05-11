@@ -1,7 +1,3 @@
-/*
-	to hell with boring ass buttons
-*/
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -31,7 +27,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		frame = new JFrame("Wowowowowow");	
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(width, height));
-		//frame.setResizable(false);
+		frame.setResizable(false);
 		frame.addKeyListener(this);
 		frame.setFocusable(true);
 		frame.requestFocus();
@@ -136,6 +132,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
 				else selected.updateLocation(mouseX, mouseY);
 			}
+			
+			//System.out.println(selected.group);
 		}
 
 		public void mouseMoved(MouseEvent e) {}
@@ -145,6 +143,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mousePressed(MouseEvent e) {}
 
 	public void mouseReleased(MouseEvent e) {
+		if(selected != null && selected.getX() > width-240) atomList.remove(selected);
+		
 		selected = null;
 	}
 
@@ -171,10 +171,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		}
 	}	
 
-	public static void main(String[] args) {
-		new Main();
-	}
-
 	public static class CanvasTwo extends JPanel {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
@@ -183,4 +179,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				placeboList.get(i).draw(g);
 		}
 	}	
+	
+	public static void main(String[] args) {
+		new Main();
+	}
 }

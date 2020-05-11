@@ -1,8 +1,3 @@
-/*
-	overhualed GUI so it's now actually drag and drop
-	changed location of selection menu from top to right side
-*/
-
 import java.util.*;
 import java.awt.*;
 import javax.swing.*;
@@ -17,9 +12,9 @@ public class Atom extends JPanel {
 
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
-	
+
 	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
-	
+
 	private int groupBonds = 0;
 	public int group = -1;
 
@@ -66,23 +61,32 @@ public class Atom extends JPanel {
 
 		if(temp != null) {
 			if(temp.group>=0) {
-				Main.groupList.get(temp.group).add(this);
-				group = temp.group;
+				if(group>=0 && group>temp.group) {					
+					int index = group;
+					
+					for(int i=0; i<Main.groupList.get(index).size(); i++) {
+						Main.groupList.get(temp.group).add(Main.groupList.get(index).get(i));
+						Main.groupList.get(index).get(i).group = temp.group;
+					}
+
+					Main.groupList.remove(index);
+				}
+
+				else if(group<0) {
+					Main.groupList.get(temp.group).add(this);
+					group = temp.group;
+				}
 			}
 			else if(temp.group<0) {
-				if(Main.groupList.size()>0) {
+				if(group>0) {
+					temp.group = group;
+					Main.groupList.get(group).add(temp);
+				}
+				else {
+					Main.groupList.add(new ArrayList<Atom>(Arrays.asList(this, temp)));
 					group = Main.groupList.size()-1;
 					temp.group = Main.groupList.size()-1;
 				}
-				else {
-					group = 0;
-					temp.group = 0;
-				}
-
-				Main.groupList.add(new ArrayList<Atom>());
-
-				Main.groupList.get(group).add(this);
-				Main.groupList.get(group).add(temp);
 			}
 		}
 		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
@@ -104,7 +108,7 @@ public class Atom extends JPanel {
 			if(atom == list.get(i)) return true;
 		return false;		
 	}
-	
+
 	public void addElement(String name) {
 		if (bondedElements.containsKey(name)) {
 			bondedElements.replace(name, bondedElements.get(name)+1);
@@ -113,11 +117,11 @@ public class Atom extends JPanel {
 			bondedElements.put(name, 1);
 		}
 	}
-	
+
 	public Integer getElement(String name) {
 		return bondedElements.get(name);
 	}
-	
+
 	public int getBonds() {
 		return groupBonds;
 	}
@@ -141,11 +145,11 @@ public class Atom extends JPanel {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
-	
+
 	public String toString() {
 		return name;
 	}
