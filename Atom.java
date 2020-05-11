@@ -1,3 +1,8 @@
+/*
+	overhualed GUI so it's now actually drag and drop
+	changed location of selection menu from top to right side
+*/
+
 import java.util.*;
 import java.awt.*;
 import javax.swing.*;
@@ -13,7 +18,7 @@ public class Atom extends JPanel {
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
 	
-	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>();
+	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
 	
 	private int groupBonds = 0;
 	public int group = -1;
