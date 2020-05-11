@@ -1,18 +1,9 @@
 import java.util.*;
 import java.awt.*;
 import javax.swing.*;
-/*
- * new things: 
- * changed the class name to ATOM for lack of confusion in the future
- * added a toString method for debugging
- * added hashmap that contains other atoms bonded to current atom + appropriate methods
- */
+
 public class Atom extends JPanel {
 	private String name;	//Atom name
-	
-	//stores atoms bonded to current atom object
-	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>();
-	private int groupBonds = 0;
 
 	private String type;
 
@@ -21,7 +12,10 @@ public class Atom extends JPanel {
 
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
-
+	
+	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>();
+	
+	private int groupBonds = 0;
 	public int group = -1;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {	
@@ -36,10 +30,10 @@ public class Atom extends JPanel {
 		this.lastY = y;
 	}
 
-	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the physics class calls to draw onto panel)
+	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)
 		Graphics2D gg = (Graphics2D) g;
 
-		if(type.equalsIgnoreCase("Atom")) gg.drawOval(lastX, lastY, objectW, objectH);
+		if(type.equalsIgnoreCase("atom")) gg.drawOval(lastX, lastY, objectW, objectH);
 		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
 	}
 
@@ -47,10 +41,8 @@ public class Atom extends JPanel {
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
-				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY)||
-						(lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
-					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) ||
-							(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
+				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY)||(lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
+					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) ||(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
 						return temp;
 					}
 			}
@@ -89,8 +81,7 @@ public class Atom extends JPanel {
 				Main.groupList.get(group).add(temp);
 			}
 		}
-		if(Main.groupList.size()>0 && group>=0) 
-			moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
+		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
 	}
 
 	public void moveGroup(int move, ArrayList<Atom> moved ,int dx, int dy) {
@@ -104,10 +95,27 @@ public class Atom extends JPanel {
 		}
 	}
 
-	public boolean matchList(Atom mole, ArrayList<Atom> list) {
+	public boolean matchList(Atom atom, ArrayList<Atom> list) {
 		for(int i=0; i<list.size(); i++) 
-			if(mole == list.get(i)) return true;
+			if(atom == list.get(i)) return true;
 		return false;		
+	}
+	
+	public void addElement(String name) {
+		if (bondedElements.containsKey(name)) {
+			bondedElements.replace(name, bondedElements.get(name)+1);
+		}
+		else {
+			bondedElements.put(name, 1);
+		}
+	}
+	
+	public Integer getElement(String name) {
+		return bondedElements.get(name);
+	}
+	
+	public int getBonds() {
+		return groupBonds;
 	}
 
 	public int getX() {
@@ -130,21 +138,8 @@ public class Atom extends JPanel {
 		return name;
 	}
 	
-	public int getBonds() {
-		return groupBonds;
-	}
-	
-	public Integer getElement(String name) {
-		return bondedElements.get(name);
-	}
-	
-	public void addElement(String name) {
-		if (bondedElements.containsKey(name)) {
-			bondedElements.replace(name, bondedElements.get(name)+1);
-		}
-		else {
-			bondedElements.put(name, 1);
-		}
+	public String getType() {
+		return type;
 	}
 	
 	public String toString() {
