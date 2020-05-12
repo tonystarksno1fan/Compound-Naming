@@ -146,12 +146,13 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					if(selected.group>=0 && selected.group>temp.group) {
 						int index = selected.group;
 
-						for(int i=0; i<Main.groupList.get(index).size(); i++) {
-							groupList.get(temp.group).add(Main.groupList.get(index).get(i));
+						for(int i=0; i<groupList.get(index).size(); i++) {
+							groupList.get(temp.group).add(groupList.get(index).get(i));
 							groupList.get(index).get(i).group = temp.group;
 						}
 
-						Main.groupList.remove(index);
+						
+						groupList.remove(index);
 					}
 
 					else if(selected.group<0) {								
@@ -163,7 +164,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				else if(temp.group<0) {
 					if(selected.group>0) {
 						temp.group = selected.group;
-						Main.groupList.get(selected.group).add(temp);
+						groupList.get(selected.group).add(temp);
 					}
 					else {						
 						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
