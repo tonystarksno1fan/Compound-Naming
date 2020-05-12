@@ -5,7 +5,6 @@
 		- That should probably be a settings option
 		
 	Bugs: 
-		Proper positioning when attaching two separate groups together
 		Attaching a circle to a rectangle does not always work on the first try
 */
 
@@ -53,6 +52,8 @@ public class Atom extends JPanel {
 			Atom temp = objectCollision(lastX, lastY);
 
 			if(temp != null && !positioning) {
+				updateLocation(temp.lastX+temp.objectW, (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY);
+				
 				if(temp.group>=0) {
 					if(group>=0 && group>temp.group) {
 						int index = group;
@@ -65,12 +66,10 @@ public class Atom extends JPanel {
 						Main.groupList.remove(index);
 					}
 
-					else if(group<0) {					
+					else if(group<0) {								
 						Main.groupList.get(temp.group).add(this);
 						group = temp.group;
 
-						lastX = temp.lastX+temp.objectW;
-						lastY = (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY;
 					}
 				}
 				else if(temp.group<0) {
@@ -78,13 +77,10 @@ public class Atom extends JPanel {
 						temp.group = group;
 						Main.groupList.get(group).add(temp);
 					}
-					else {
+					else {						
 						Main.groupList.add(new ArrayList<Atom>(Arrays.asList(this, temp)));
 						group = Main.groupList.size()-1;
 						temp.group = Main.groupList.size()-1;
-
-						lastX = temp.lastX+temp.objectW;
-						lastY = (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY;
 					}
 				}
 			}
@@ -98,8 +94,6 @@ public class Atom extends JPanel {
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
 		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
-
-		//if(!positioning) positioning = true;
 
 		dx = 0;
 		dy = 0;
