@@ -13,6 +13,11 @@ public class Atom extends JPanel {
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
 
+	private int dx;
+	private int dy;
+
+	public boolean positioning;
+
 	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
 
 	private int groupBonds = 0;
@@ -33,11 +38,57 @@ public class Atom extends JPanel {
 	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)
 		Graphics2D gg = (Graphics2D) g;
 
+		if(Main.selected == this) {
+			Atom temp = objectCollision(lastX, lastY);
+
+			if(temp != null && !positioning) {
+				if(temp.group>=0) {
+					if(group>=0 && group>temp.group) {
+						int index = group;
+
+						for(int i=0; i<Main.groupList.get(index).size(); i++) {
+							Main.groupList.get(temp.group).add(Main.groupList.get(index).get(i));
+							Main.groupList.get(index).get(i).group = temp.group;
+						}
+
+						Main.groupList.remove(index);
+					}
+
+					else if(group<0) {					
+						Main.groupList.get(temp.group).add(this);
+						group = temp.group;
+
+						lastX = temp.lastX+temp.objectW;
+						lastY = (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY;
+					}
+				}
+				else if(temp.group<0) {
+					if(group>0) {
+						temp.group = group;
+						Main.groupList.get(group).add(temp);
+					}
+					else {
+						Main.groupList.add(new ArrayList<Atom>(Arrays.asList(this, temp)));
+						group = Main.groupList.size()-1;
+						temp.group = Main.groupList.size()-1;
+
+						lastX = temp.lastX+temp.objectW;
+						lastY = (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY;
+					}
+				}
+			}
+		}
+
 		if(type.equalsIgnoreCase("atom")) {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
 		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
+
+		//if(!positioning) positioning = true;
+
+		dx = 0;
+		dy = 0;
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {
@@ -54,51 +105,19 @@ public class Atom extends JPanel {
 	}
 
 	public void updateLocation(int x, int y) {
-		int dx = x - lastX;
-		int dy = y - lastY;
+		dx = x - lastX;
+		dy = y - lastY;
 
 		lastX = x;
 		lastY = y;
 
-		Atom temp = objectCollision(lastX, lastY);
-
-		if(temp != null) {
-			if(temp.group>=0) {
-				if(group>=0 && group>temp.group) {					
-					int index = group;
-					
-					for(int i=0; i<Main.groupList.get(index).size(); i++) {
-						Main.groupList.get(temp.group).add(Main.groupList.get(index).get(i));
-						Main.groupList.get(index).get(i).group = temp.group;
-					}
-
-					Main.groupList.remove(index);
-				}
-
-				else if(group<0) {
-					Main.groupList.get(temp.group).add(this);
-					group = temp.group;
-				}
-			}
-			else if(temp.group<0) {
-				if(group>0) {
-					temp.group = group;
-					Main.groupList.get(group).add(temp);
-				}
-				else {
-					Main.groupList.add(new ArrayList<Atom>(Arrays.asList(this, temp)));
-					group = Main.groupList.size()-1;
-					temp.group = Main.groupList.size()-1;
-				}
-			}
-		}
 		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
 	}
 
 	public void moveGroup(int move, ArrayList<Atom> moved ,int dx, int dy) {
 		for(int i=0; i<Main.groupList.get(move).size(); i++) {
 			Atom temp = Main.groupList.get(move).get(i);
-			
+
 			if(temp != this && !matchList(temp, moved)) {
 				temp.lastX += dx;
 				temp.lastY += dy;

@@ -10,7 +10,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static int mouseX;
 	public static int mouseY;
 
-	public Atom selected;
+	public static Atom selected;
 
 	//Put any and all objects you create into an ArrayList, the Canvas method will draw their contents onto the panel
 	public static ArrayList<Atom> atomList = new ArrayList<Atom>();
@@ -68,24 +68,16 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("H", 80, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 20, 10, "singleBond"));
-		
-		Thread closeThread = new Thread(new Runnable() {
-			public void run() {
-				while(true) {
-					try { Thread.sleep(10);} catch (InterruptedException e) {}
-				}
-			}
-		});
+
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
 				while(true) {
 					panel.repaint();
 					controls.repaint();
-					try {Thread.sleep(20);} catch (Exception ex) {}	//20 millisecond delay between each refresh
+					try {Thread.sleep(10);} catch (Exception ex) {}	//20 millisecond delay between each refresh
 				}
 			}
 		});			
-		closeThread.start();
 		animationThread.start();	//Start the main loop
 	}
 
@@ -107,7 +99,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {
 			mouseX = e.getX();
 			mouseY = e.getY();
-
+			
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
 					for(int i=0; i<atomList.size(); i++) {
@@ -131,8 +123,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			else {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
 				else selected.updateLocation(mouseX, mouseY);
+				selected.positioning = true;
 			}
-			
 			//System.out.println(selected.group);
 		}
 
@@ -140,12 +132,15 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	};
 	
 	public void mouseClicked(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		selected = null;
+	}
 
 	public void mouseReleased(MouseEvent e) {
-		if(selected != null && selected.getX() > width-240) atomList.remove(selected);
-		
-		selected = null;
+		if(selected != null) {
+			selected.positioning = false;
+			if(selected.getX() > width-240) atomList.remove(selected);
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) {}
