@@ -99,7 +99,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {
 			mouseX = e.getX();
 			mouseY = e.getY();
-			
+
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
 					for(int i=0; i<atomList.size(); i++) {
@@ -123,14 +123,12 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			else {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
 				else selected.updateLocation(mouseX, mouseY);
-				selected.positioning = true;
 			}
-			//System.out.println(selected.group);
 		}
 
 		public void mouseMoved(MouseEvent e) {}
 	};
-	
+
 	public void mouseClicked(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {
 		selected = null;
@@ -138,7 +136,43 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 	public void mouseReleased(MouseEvent e) {
 		if(selected != null) {
-			selected.positioning = false;
+
+			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
+
+			if(temp != null) {
+				selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+
+				if(temp.group>=0) {
+					if(selected.group>=0 && selected.group>temp.group) {
+						int index = selected.group;
+
+						for(int i=0; i<Main.groupList.get(index).size(); i++) {
+							groupList.get(temp.group).add(Main.groupList.get(index).get(i));
+							groupList.get(index).get(i).group = temp.group;
+						}
+
+						Main.groupList.remove(index);
+					}
+
+					else if(selected.group<0) {								
+						groupList.get(temp.group).add(selected);
+						selected.group = temp.group;
+
+					}
+				}
+				else if(temp.group<0) {
+					if(selected.group>0) {
+						temp.group = selected.group;
+						Main.groupList.get(selected.group).add(temp);
+					}
+					else {						
+						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+						selected.group = groupList.size()-1;
+						temp.group = groupList.size()-1;
+					}
+				}
+			}
+
 			if(selected.getX() > width-240) atomList.remove(selected);
 		}
 	}
@@ -165,7 +199,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			for(int i=0; i<atomList.size(); i++)
 				atomList.get(i).draw(g);
 		}
-	}	
+	}
 
 	public static class CanvasTwo extends JPanel {
 		public void paintComponent(Graphics g) {
@@ -175,7 +209,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				placeboList.get(i).draw(g);
 		}
 	}	
-	
+
 	public static void main(String[] args) {
 		new Main();
 	}
