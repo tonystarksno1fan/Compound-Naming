@@ -33,7 +33,10 @@ public class Atom extends JPanel {
 	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)
 		Graphics2D gg = (Graphics2D) g;
 
-		if(type.equalsIgnoreCase("atom")) gg.drawOval(lastX, lastY, objectW, objectH);
+		if(type.equalsIgnoreCase("atom")) {
+			gg.drawOval(lastX, lastY, objectW, objectH);
+			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
+		}
 		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
 	}
 
@@ -95,6 +98,7 @@ public class Atom extends JPanel {
 	public void moveGroup(int move, ArrayList<Atom> moved ,int dx, int dy) {
 		for(int i=0; i<Main.groupList.get(move).size(); i++) {
 			Atom temp = Main.groupList.get(move).get(i);
+			
 			if(temp != this && !matchList(temp, moved)) {
 				temp.lastX += dx;
 				temp.lastY += dy;

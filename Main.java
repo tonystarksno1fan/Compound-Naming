@@ -65,8 +65,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		singleBond.addActionListener(this);
 		controls.add(singleBond);*/
 
-		placeboList.add(new Atom("Carbon", 20, 20, 20, 20, "atom"));
-		placeboList.add(new Atom("Hydrogen", 80, 20, 20, 20, "atom"));
+		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
+		placeboList.add(new Atom("H", 80, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 20, 10, "singleBond"));
 		
 		Thread closeThread = new Thread(new Runnable() {
@@ -99,7 +99,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {}
 
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_1) atomList.add(new Atom("Atom", 250, 25, 20, 20, "atom"));
+		if(e.getKeyCode() == KeyEvent.VK_1) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
 		else if(e.getKeyCode() == KeyEvent.VK_2) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
 	}
 
@@ -152,7 +152,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mouseExited(MouseEvent e) {}
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("Atom", 250, 25, 20, 20, "atom"));
+		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
 
 		else if(e.getActionCommand().equals("addSingleBond")) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
 
