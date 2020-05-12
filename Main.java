@@ -160,6 +160,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 			g.drawString("Press 1 to add a circle (atom), 2 to add a rectangle (single bond, for now)", (width-240)/2, height/2);
 			g.drawString("Drag and drop time", (width-240)/2, height/2+40);
+			g.drawString("Just make sure the components overlap before dropping", (width-240)/2, height/2+60);
 
 			for(int i=0; i<atomList.size(); i++)
 				atomList.get(i).draw(g);

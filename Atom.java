@@ -79,6 +79,9 @@ public class Atom extends JPanel {
 			}
 		}
 
+		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		gg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
 		if(type.equalsIgnoreCase("atom")) {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
