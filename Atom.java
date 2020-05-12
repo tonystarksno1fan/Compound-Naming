@@ -1,3 +1,13 @@
+/*
+	Snappier component connections (next step: rotations + connection orientation)
+	JAVA HAS ANTI-ALAISING?????????? These circles now be looking fineeee
+		- Used 16% of my GPU tho lmao
+		
+	Bugs: 
+		Proper positioning when attaching two separate groups together
+		Attaching a circle to a rectangle does not always work on the first try
+*/
+
 import java.util.*;
 import java.awt.*;
 import javax.swing.*;
