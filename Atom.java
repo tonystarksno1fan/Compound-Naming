@@ -2,6 +2,7 @@
 	Snappier component connections (next step: rotations + connection orientation)
 	JAVA HAS ANTI-ALAISING?????????? These circles now be looking fineeee
 		- Used 16% of my GPU tho lmao
+		- That should probably be a settings option
 		
 	Bugs: 
 		Proper positioning when attaching two separate groups together
