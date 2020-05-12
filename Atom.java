@@ -26,8 +26,6 @@ public class Atom extends JPanel {
 	private int dx;
 	private int dy;
 
-	public boolean positioning;
-
 	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
 
 	private int groupBonds = 0;
@@ -45,46 +43,8 @@ public class Atom extends JPanel {
 		this.lastY = y;
 	}
 
-	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)
+	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)		
 		Graphics2D gg = (Graphics2D) g;
-
-		if(Main.selected == this) {
-			Atom temp = objectCollision(lastX, lastY);
-
-			if(temp != null && !positioning) {
-				updateLocation(temp.lastX+temp.objectW, (temp.lastY+temp.objectH/2) - (lastY+objectH/2) + lastY);
-				
-				if(temp.group>=0) {
-					if(group>=0 && group>temp.group) {
-						int index = group;
-
-						for(int i=0; i<Main.groupList.get(index).size(); i++) {
-							Main.groupList.get(temp.group).add(Main.groupList.get(index).get(i));
-							Main.groupList.get(index).get(i).group = temp.group;
-						}
-
-						Main.groupList.remove(index);
-					}
-
-					else if(group<0) {								
-						Main.groupList.get(temp.group).add(this);
-						group = temp.group;
-
-					}
-				}
-				else if(temp.group<0) {
-					if(group>0) {
-						temp.group = group;
-						Main.groupList.get(group).add(temp);
-					}
-					else {						
-						Main.groupList.add(new ArrayList<Atom>(Arrays.asList(this, temp)));
-						group = Main.groupList.size()-1;
-						temp.group = Main.groupList.size()-1;
-					}
-				}
-			}
-		}
 
 		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		gg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
