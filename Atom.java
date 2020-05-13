@@ -22,6 +22,8 @@ public class Atom extends JPanel {
 
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
+	
+	private double angle = 0;
 
 	private int dx;
 	private int dy;
@@ -44,19 +46,36 @@ public class Atom extends JPanel {
 	}
 
 	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)		
-		Graphics2D gg = (Graphics2D) g;
+		Graphics2D gg = (Graphics2D) g.create();
 
 		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		gg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+		
+		Stroke defaultStroke = gg.getStroke();
 
 		if(type.equalsIgnoreCase("atom")) {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
-		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
+		else if(type.equalsIgnoreCase("singleBond")) {			
+			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);			
+			gg.drawRect(lastX, lastY, objectW, objectH);
+		}
+
+		if(Main.selected == this) {
+			gg.setColor(Color.yellow);
+			gg.setStroke(new BasicStroke(4));
+			if(type.equalsIgnoreCase("atom")) gg.drawOval(lastX-2, lastY-2, objectW+4,objectH+4);
+			else gg.drawRect(lastX-2, lastY-2, objectW+4,objectH+4);
+		}
+
+		gg.setStroke(defaultStroke);
+		gg.setColor(Color.black);
 
 		dx = 0;
 		dy = 0;
+		
+		gg.dispose();
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {
@@ -92,6 +111,16 @@ public class Atom extends JPanel {
 				moved.add(temp);
 			}
 		}
+	}
+	
+	public void rotateRight() {
+		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
+		else angle += Math.PI/4;
+	}
+	
+	public void rotateLeft() {
+		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
+		else angle -= Math.PI/4;
 	}
 
 	public boolean matchList(Atom atom, ArrayList<Atom> list) {
