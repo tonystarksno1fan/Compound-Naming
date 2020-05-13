@@ -7,8 +7,7 @@
 		- Used 16% of my GPU tho lmao
 		- That should probably be a settings option
 		
-	Bugs: 
-		Attaching a circle to a rectangle does not always work on the first try
+	Updated objectCollision method
 */
 
 import java.util.*;
@@ -16,19 +15,19 @@ import java.awt.*;
 import javax.swing.*;
 
 public class Atom extends JPanel {
-	private String name;	//Atom name
+	private String name;		//Atom name
 
-	private String type;	//E.g. atom, singleBond, doubleBond
+	private String type;		//E.g. atom, singleBond, doubleBond
 
 	private int objectW;	
 	private int objectH;
 
-	private int lastX;	//Current X value
-	private int lastY;	//Current Y value
+	private int lastX;			//Current X value
+	private int lastY;			//Current Y value
 	
 	private double angle = 0;	//Current rotation angle. Only applies to non-circular objects like bonds
 
-	private int dx;		//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
+	private int dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private int dy;
 
 	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //Atoms bonded to current atom object
@@ -36,7 +35,7 @@ public class Atom extends JPanel {
 	private int groupBonds = 0;
 	public int group = -1;
 
-	public Atom(String name, int x, int y, int width, int height, String type) {	
+	public Atom(String name, int x, int y, int width, int height, String type) {
 		this.name = name;
 
 		this.type = type;
@@ -82,7 +81,7 @@ public class Atom extends JPanel {
 
 		gg.setStroke(defaultStroke);
 		gg.setColor(Color.black);
-
+		
 		dx = 0;
 		dy = 0;
 		
@@ -93,8 +92,12 @@ public class Atom extends JPanel {
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
-				if((lastY <= temp.lastY + temp.objectH && lastY >= temp.lastY) || (lastY + objectH <= temp.lastY + temp.objectH && lastY+ objectH >= temp.lastY))
-					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) || (lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {
+				if((lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
+						(lastY+objectH <= temp.lastY+temp.objectH && lastY+objectH >= temp.lastY) ||
+						(lastY <= temp.lastY && lastY+objectH >= temp.lastY+temp.objectH))
+					
+					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) || 
+							(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {						
 						return temp;
 					}
 			}
