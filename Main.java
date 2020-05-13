@@ -4,24 +4,23 @@ import java.awt.event.*;
 import java.util.*;
 
 public class Main implements ActionListener, KeyListener, MouseListener {
-	public static final int height = 700;	
+	public static final int height = 700;	//Frame dimensions
 	public static final int width = 1000;
 
 	public static int mouseX;
 	public static int mouseY;
 
-	public static Atom selected;
+	public static Atom selected;	//Current Atom object that is "selected" by the user
 
-	//Put any and all objects you create into an ArrayList, the Canvas method will draw their contents onto the panel
-	public static ArrayList<Atom> atomList = new ArrayList<Atom>();
-	public static ArrayList<Atom> placeboList = new ArrayList<Atom>();
+	public static ArrayList<Atom> atomList = new ArrayList<Atom>();				//Will draw contents onto main panel (see comments at the JSplitPane declaration)
+	public static ArrayList<Atom> placeboList = new ArrayList<Atom>();			//Will draw contents onto right side-panel
 
 	public static ArrayList<ArrayList<Atom>> groupList = new ArrayList<ArrayList<Atom>>();
 
 	public static JFrame frame;
-	public static final JSplitPane splitPane = new JSplitPane();
-	public static final JPanel panel = new Canvas();
-	private static final JPanel controls = new CanvasTwo();
+	public static final JSplitPane splitPane = new JSplitPane();	//Used to combine two JPanels side by side in a single JFrame
+	public static final JPanel panel = new Canvas();				//Main panel where the molecule stuff happens
+	private static final JPanel controls = new CanvasTwo();			//Right side-panel for dragging components from
 
 	public Main() {
 		frame = new JFrame("Wowowowowow");	
@@ -56,15 +55,16 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		frame.setVisible(true);		
 
 		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
-		placeboList.add(new Atom("H", 80, 20, 20, 20, "atom"));
-		placeboList.add(new Atom("Single Bond", 50, 20, 20, 10, "singleBond"));
+		placeboList.add(new Atom("H", 90, 20, 20, 20, "atom"));
+		placeboList.add(new Atom("Single Bond", 50, 20, 30, 10, "singleBond"));
+		placeboList.add(new Atom("Double Bond", 120, 20, 30, 10, "doubleBond"));
 
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
 				while(true) {
 					panel.repaint();
 					controls.repaint();
-					try {Thread.sleep(10);} catch (Exception ex) {}	//20 millisecond delay between each refresh
+					try {Thread.sleep(20);} catch (Exception ex) {}	//20 millisecond delay between each refresh
 				}
 			}
 		});			
@@ -86,8 +86,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	}
 
 	MouseMotionListener motionListener = new MouseAdapter() {
-		public void mouseDragged(MouseEvent e) {
-			mouseX = e.getX();
+		public void mouseDragged(MouseEvent e) {							//Responsible for updating the location of the dragged object
+			mouseX = e.getX();												//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
 
 			if(selected == null) {
@@ -120,7 +120,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	};
 
 	public void mouseClicked(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {
+	public void mousePressed(MouseEvent e) {			//Responsible for selecting an object, or deselecting if mouse is pressed in the void of space
 		Atom original = selected;
 		
 		if(((JPanel)e.getSource()).getName().equals("panel")) {
@@ -135,7 +135,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		else selected = null;
 	}
 
-	public void mouseReleased(MouseEvent e) {
+	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
@@ -181,7 +181,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {		//A to rotate selected object left, B to rotate right
 		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
 
 		else if(e.getActionCommand().equals("addSingleBond")) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
@@ -189,7 +189,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		frame.requestFocus();
 	}
 
-	public static class Canvas extends JPanel {
+	public static class Canvas extends JPanel {		//Responsible for drawing onto the main screen (the portion that does not contain the controls)
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
 
@@ -203,7 +203,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		}
 	}
 
-	public static class CanvasTwo extends JPanel {
+	public static class CanvasTwo extends JPanel {		//Responsible for drawing onto the portion with the placebo objects (where you draw objects from)
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
 
