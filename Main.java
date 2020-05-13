@@ -55,15 +55,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);		
 
-		/*JButton atom = new JButton("Atom");
-		atom.setActionCommand("addAtom");
-		atom.addActionListener(this);
-		controls.add(atom);
-		JButton singleBond = new JButton("Single Bond");
-		singleBond.setActionCommand("addSingleBond");
-		singleBond.addActionListener(this);
-		controls.add(singleBond);*/
-
 		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("H", 80, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 20, 10, "singleBond"));
@@ -90,8 +81,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {}
 
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_1) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
-		else if(e.getKeyCode() == KeyEvent.VK_2) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
+		if(e.getKeyCode() == KeyEvent.VK_A) selected.rotateLeft();
+		else if(e.getKeyCode() == KeyEvent.VK_D) selected.rotateRight();
 	}
 
 	MouseMotionListener motionListener = new MouseAdapter() {
@@ -130,12 +121,22 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 	public void mouseClicked(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {
-		selected = null;
+		Atom original = selected;
+		
+		if(((JPanel)e.getSource()).getName().equals("panel")) {
+			for(int i=0; i<atomList.size(); i++) {
+				Atom temp = atomList.get(i);			
+				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
+					selected = temp;
+				}
+			}
+			if(selected == original) selected = null;
+		}
+		else selected = null;
 	}
 
 	public void mouseReleased(MouseEvent e) {
 		if(selected != null) {
-
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
 			if(temp != null) {
@@ -150,7 +151,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 							groupList.get(index).get(i).group = temp.group;
 						}
 
-						
+
 						groupList.remove(index);
 					}
 
@@ -192,9 +193,10 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
 
-			g.drawString("Press 1 to add a circle (atom), 2 to add a rectangle (single bond, for now)", (width-240)/2, height/2);
-			g.drawString("Drag and drop time", (width-240)/2, height/2+40);
-			g.drawString("Just make sure the components overlap before dropping", (width-240)/2, height/2+60);
+			g.drawString("Click on a component to select it", (width-240)/2, height/2);
+			g.drawString("press A to rotate left and D to rotate right", (width-240)/2, height/2+20);
+			g.drawString("Drag and drop time", (width-240)/2, height/2+60);
+			g.drawString("Just make sure the components overlap before dropping", (width-240)/2, height/2+80);
 
 			for(int i=0; i<atomList.size(); i++)
 				atomList.get(i).draw(g);
