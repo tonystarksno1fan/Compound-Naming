@@ -1,6 +1,11 @@
 /*
-	overhualed GUI so it's now actually drag and drop
-	changed location of selection menu from top to right side
+	Snappier component connections (next step: rotations + connection orientation)
+	JAVA HAS ANTI-ALIASING?????????? These circles now be looking fineeee
+		- Used 16% of my GPU tho lmao
+		- That should probably be a settings option
+		
+	Bugs: 
+		Attaching a circle to a rectangle does not always work on the first try
 */
 
 import java.util.*;
@@ -17,9 +22,12 @@ public class Atom extends JPanel {
 
 	private int lastX;	//Current X value
 	private int lastY;	//Current Y value
-	
-//	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
-	
+
+	private int dx;
+	private int dy;
+
+	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //atoms bonded to current atom object
+
 	private int groupBonds = 0;
 	public int group = -1;
 
@@ -35,11 +43,20 @@ public class Atom extends JPanel {
 		this.lastY = y;
 	}
 
-	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)
+	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)		
 		Graphics2D gg = (Graphics2D) g;
 
-		if(type.equalsIgnoreCase("atom")) gg.drawOval(lastX, lastY, objectW, objectH);
+		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		gg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+		if(type.equalsIgnoreCase("atom")) {
+			gg.drawOval(lastX, lastY, objectW, objectH);
+			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
+		}
 		else if(type.equalsIgnoreCase("singleBond")) gg.drawRect(lastX, lastY, objectW, objectH);
+
+		dx = 0;
+		dy = 0;
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {
@@ -56,41 +73,19 @@ public class Atom extends JPanel {
 	}
 
 	public void updateLocation(int x, int y) {
-		int dx = x - lastX;
-		int dy = y - lastY;
+		dx = x - lastX;
+		dy = y - lastY;
 
 		lastX = x;
 		lastY = y;
 
-		Atom temp = objectCollision(lastX, lastY);
-
-		if(temp != null) {
-			if(temp.group>=0) {
-				Main.groupList.get(temp.group).add(this);
-				group = temp.group;
-			}
-			else if(temp.group<0) {
-				if(Main.groupList.size()>0) {
-					group = Main.groupList.size()-1;
-					temp.group = Main.groupList.size()-1;
-				}
-				else {
-					group = 0;
-					temp.group = 0;
-				}
-
-				Main.groupList.add(new ArrayList<Atom>());
-
-				Main.groupList.get(group).add(this);
-				Main.groupList.get(group).add(temp);
-			}
-		}
 		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
 	}
 
 	public void moveGroup(int move, ArrayList<Atom> moved ,int dx, int dy) {
 		for(int i=0; i<Main.groupList.get(move).size(); i++) {
 			Atom temp = Main.groupList.get(move).get(i);
+
 			if(temp != this && !matchList(temp, moved)) {
 				temp.lastX += dx;
 				temp.lastY += dy;
@@ -104,20 +99,20 @@ public class Atom extends JPanel {
 			if(atom == list.get(i)) return true;
 		return false;		
 	}
-	
-//	public void addElement(String name) {
-//		if (bondedElements.containsKey(name)) {
-//			bondedElements.replace(name, bondedElements.get(name)+1);
-//		}
-//		else {
-//			bondedElements.put(name, 1);
-//		}
-//	}
-//	
-//	public Integer getElement(String name) {
-//		return bondedElements.get(name);
-//	}
-	
+
+	public void addElement(String name) {
+		if (bondedElements.containsKey(name)) {
+			bondedElements.replace(name, bondedElements.get(name)+1);
+		}
+		else {
+			bondedElements.put(name, 1);
+		}
+	}
+
+	public Integer getElement(String name) {
+		return bondedElements.get(name);
+	}
+
 	public int getBonds() {
 		return groupBonds;
 	}
@@ -141,12 +136,13 @@ public class Atom extends JPanel {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
-	
+
 	public String toString() {
 		return name;
 	}
 }
+

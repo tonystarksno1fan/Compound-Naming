@@ -1,7 +1,3 @@
-/*
-	to hell with boring ass buttons
-*/
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,7 +10,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static int mouseX;
 	public static int mouseY;
 
-	public Atom selected;
+	public static Atom selected;
 
 	//Put any and all objects you create into an ArrayList, the Canvas method will draw their contents onto the panel
 	public static ArrayList<Atom> atomList = new ArrayList<Atom>();
@@ -31,7 +27,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		frame = new JFrame("Wowowowowow");	
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(width, height));
-		//frame.setResizable(false);
+		frame.setResizable(false);
 		frame.addKeyListener(this);
 		frame.setFocusable(true);
 		frame.requestFocus();
@@ -68,27 +64,19 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		singleBond.addActionListener(this);
 		controls.add(singleBond);*/
 
-		placeboList.add(new Atom("Carbon", 20, 20, 20, 20, "atom"));
-		placeboList.add(new Atom("Hydrogen", 80, 20, 20, 20, "atom"));
+		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
+		placeboList.add(new Atom("H", 80, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 20, 10, "singleBond"));
-		
-		Thread closeThread = new Thread(new Runnable() {
-			public void run() {
-				while(true) {
-					try { Thread.sleep(10);} catch (InterruptedException e) {}
-				}
-			}
-		});
+
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
 				while(true) {
 					panel.repaint();
 					controls.repaint();
-					try {Thread.sleep(20);} catch (Exception ex) {}	//20 millisecond delay between each refresh
+					try {Thread.sleep(10);} catch (Exception ex) {}	//20 millisecond delay between each refresh
 				}
 			}
 		});			
-		closeThread.start();
 		animationThread.start();	//Start the main loop
 	}
 
@@ -102,7 +90,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {}
 
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_1) atomList.add(new Atom("Atom", 250, 25, 20, 20, "atom"));
+		if(e.getKeyCode() == KeyEvent.VK_1) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
 		else if(e.getKeyCode() == KeyEvent.VK_2) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
 	}
 
@@ -139,19 +127,61 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 		public void mouseMoved(MouseEvent e) {}
 	};
-	
+
 	public void mouseClicked(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		selected = null;
+	}
 
 	public void mouseReleased(MouseEvent e) {
-		selected = null;
+		if(selected != null) {
+
+			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
+
+			if(temp != null) {
+				selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+
+				if(temp.group>=0) {
+					if(selected.group>=0 && selected.group>temp.group) {
+						int index = selected.group;
+
+						for(int i=0; i<groupList.get(index).size(); i++) {
+							groupList.get(temp.group).add(groupList.get(index).get(i));
+							groupList.get(index).get(i).group = temp.group;
+						}
+
+						
+						groupList.remove(index);
+					}
+
+					else if(selected.group<0) {								
+						groupList.get(temp.group).add(selected);
+						selected.group = temp.group;
+
+					}
+				}
+				else if(temp.group<0) {
+					if(selected.group>0) {
+						temp.group = selected.group;
+						groupList.get(selected.group).add(temp);
+					}
+					else {						
+						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+						selected.group = groupList.size()-1;
+						temp.group = groupList.size()-1;
+					}
+				}
+			}
+
+			if(selected.getX() > width-240) atomList.remove(selected);
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("Atom", 250, 25, 20, 20, "atom"));
+		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
 
 		else if(e.getActionCommand().equals("addSingleBond")) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
 
@@ -164,14 +194,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 			g.drawString("Press 1 to add a circle (atom), 2 to add a rectangle (single bond, for now)", (width-240)/2, height/2);
 			g.drawString("Drag and drop time", (width-240)/2, height/2+40);
+			g.drawString("Just make sure the components overlap before dropping", (width-240)/2, height/2+60);
 
 			for(int i=0; i<atomList.size(); i++)
 				atomList.get(i).draw(g);
 		}
-	}	
-
-	public static void main(String[] args) {
-		new Main();
 	}
 
 	public static class CanvasTwo extends JPanel {
@@ -182,4 +209,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				placeboList.get(i).draw(g);
 		}
 	}	
+
+	public static void main(String[] args) {
+		new Main();
+	}
 }
