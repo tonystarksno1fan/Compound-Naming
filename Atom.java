@@ -1,6 +1,10 @@
 /*
 	Snappier component connections
 	Component rotation
+	Directional Component Attachment 
+		- Available for 0, 90, 180, 270 degrees clockwise and counterclockwise rotations
+		- Yes, you can make a crude swastika
+		
 	Better graphics
 	
 	JAVA HAS ANTI-ALIASING?????????? These circles now be looking fineeee
@@ -12,6 +16,7 @@
 
 import java.util.*;
 import java.awt.*;
+
 import javax.swing.*;
 
 public class Atom extends JPanel {
@@ -24,8 +29,8 @@ public class Atom extends JPanel {
 
 	private int lastX;			//Current X value
 	private int lastY;			//Current Y value
-	
-	private double angle = 0;	//Current rotation angle. Only applies to non-circular objects like bonds
+
+	public double angle = 0;	//Current rotation angle. Only applies to non-circular objects like bonds
 
 	private int dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private int dy;
@@ -61,12 +66,12 @@ public class Atom extends JPanel {
 		}
 		else if(type.equalsIgnoreCase("singleBond")) {										//Draw single bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
-			
+
 			gg.drawLine(lastX, lastY+objectH/2, lastX+objectW, lastY+objectH/2);
 		}
 		else if(type.equalsIgnoreCase("doubleBond")) {										//Draw double bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
-			
+
 			gg.drawLine(lastX, lastY+objectH/3, lastX+objectW, lastY+objectH/3);
 			gg.drawLine(lastX+objectW/8, lastY+objectH/3 * 2, lastX+objectW/8 * 9, lastY+objectH/3 * 2);
 		}
@@ -74,32 +79,43 @@ public class Atom extends JPanel {
 		if(Main.selected == this) {															//Draw the yellow "selected" halo
 			gg.setColor(Color.yellow);
 			gg.setStroke(new BasicStroke(4));
-			
+
 			if(type.equalsIgnoreCase("atom")) gg.drawOval(lastX-2, lastY-2, objectW+4,objectH+4);
 			else gg.drawRect(lastX-2, lastY-2, objectW+4,objectH+4);
 		}
 
 		gg.setStroke(defaultStroke);
 		gg.setColor(Color.black);
-		
+
 		dx = 0;
 		dy = 0;
-		
+
 		gg.dispose();
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {		//Goes through atomList in Main to check for a collision between Atom objects and the given X and Y 
+		//if(Main.atomList.size() <= 1) return null;
+
+		if(angle != 0 && angle != Math.PI) {
+			lastX = lastX+objectW/2-objectH/2;
+			lastY = lastY+objectH/2-objectW/2;
+		}
+
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
-				if((lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
+
+				if(		(lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
 						(lastY+objectH <= temp.lastY+temp.objectH && lastY+objectH >= temp.lastY) ||
-						(lastY <= temp.lastY && lastY+objectH >= temp.lastY+temp.objectH))
-					
-					if((lastX >= temp.lastX && lastX <= temp.lastX + temp.objectW) || 
-							(lastX + objectW >= temp.lastX && lastX + objectW <= temp.lastX + temp.objectW)) {						
+						(lastY >= temp.lastY && lastY+objectH <= temp.lastY+temp.objectH) ||
+						(angle!=0 && angle!=Math.PI && lastY+objectW <= temp.lastY+temp.objectH && lastY+objectW >= temp.lastY)) {
+
+					if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
+							(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
+						
 						return temp;
 					}
+				}
 			}
 		}
 		return null;
@@ -126,12 +142,12 @@ public class Atom extends JPanel {
 			}
 		}
 	}
-	
+
 	public void rotateRight() {
 		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
 		else angle += Math.PI/4;
 	}
-	
+
 	public void rotateLeft() {
 		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
 		else angle -= Math.PI/4;

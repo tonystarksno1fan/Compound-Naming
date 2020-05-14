@@ -81,8 +81,10 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {}
 
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_A) selected.rotateLeft();
-		else if(e.getKeyCode() == KeyEvent.VK_D) selected.rotateRight();
+		if(selected != null) {
+			if(e.getKeyCode() == KeyEvent.VK_A) selected.rotateLeft();
+			else if(e.getKeyCode() == KeyEvent.VK_D) selected.rotateRight();
+		}
 	}
 
 	MouseMotionListener motionListener = new MouseAdapter() {
@@ -122,7 +124,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mouseClicked(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {			//Responsible for selecting an object, or deselecting if mouse is pressed in the void of space
 		Atom original = selected;
-		
+
 		if(((JPanel)e.getSource()).getName().equals("panel")) {
 			for(int i=0; i<atomList.size(); i++) {
 				Atom temp = atomList.get(i);			
@@ -139,8 +141,26 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
-			if(temp != null) {
-				selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+			if(temp != null) {				
+				if(selected.getX() >= temp.getX() && (selected.angle == Math.PI || selected.angle == 0)) 		//Component is rotated 0 or 180 degrees, on the right
+					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+
+				else if(selected.getX() <= temp.getX() && (selected.angle == Math.PI || selected.angle == 0)) 	//Component is rotated 0 or 180 degrees, on the left
+					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+
+				else if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Component is rotated and blow target					
+					int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
+					int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+										
+					selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+				}
+				
+				else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Component is rotated and blow target					
+					int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
+					int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+										
+					selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+				}
 
 				if(temp.group>=0) {
 					if(selected.group>=0 && selected.group>temp.group) {
@@ -166,7 +186,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						temp.group = selected.group;
 						groupList.get(selected.group).add(temp);
 					}
-					else {						
+					else {
 						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
 						selected.group = groupList.size()-1;
 						temp.group = groupList.size()-1;
