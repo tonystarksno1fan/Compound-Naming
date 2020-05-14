@@ -1,4 +1,5 @@
 import java.util.*;
+
 public class Molecule {
 	/*
 	 * only works for completely flat molecules (1D)
