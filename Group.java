@@ -1,8 +1,11 @@
 import java.util.*;
+
 public class Group {
 	String name;
+	
 	int row;
 	int col;
+	
 	HashMap<String, Integer> elements = new HashMap<String, Integer>();
 	
 	//constructor for molecules you get from GUI
