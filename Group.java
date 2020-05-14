@@ -8,8 +8,8 @@ public class Group {
 	//constructor for molecules you get from GUI
 	public Group (int numHydrogen, int numCarbons, int x, int y) {
 		name = Nomenclature.oPrefixes.get(numCarbons)+"yl";
-		elements.put("Hydrogen", numHydrogen);
-		elements.put("Carbon", numCarbons);
+		elements.put("hydrogen", numHydrogen);
+		elements.put("carbon", numCarbons);
 		
 		/*
 		 * insert some grade 9 math to calculate row/column of the group
@@ -19,8 +19,8 @@ public class Group {
 	//debugging constructor
 	public Group(int h, int c) {
 		name = Nomenclature.oPrefixes.get(c)+"yl";
-		elements.put("Hydrogen", h);
-		elements.put("Carbon", c);
+		elements.put("hydrogen", h);
+		elements.put("carbon", c);
 	}
 	
 	//constructor for bonds

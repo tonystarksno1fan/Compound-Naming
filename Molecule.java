@@ -4,39 +4,55 @@ public class Molecule {
 	 * only works for completely flat molecules (1D)
 	 */
 	static private Group[][] molecule = new Group[15][15];
+	static private Nomenclature nom = new Nomenclature();
 
 	static int longest = 0;	//length of longest carbon chain
-	public static String findType(ArrayList<Atom> arr) {
-		for (int i = 0; i < arr.size(); i++) {
-			if (arr.get(i).getName().equals("Double Bond")) {
-				return "double";
-			}
-			else if (arr.get(i).getName().equals("Triple Bond")) {
-				return "triple";
+
+	public static String findType(Group[][] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			for (int k = 0; k < arr[0].length; k++) {
+				if (arr[i][k] != null) {
+					if (arr[i][k].toString().equals("triple")) {
+						return "triple";
+					}
+					else if (arr[i][k].toString().equals("double")) {
+						return "double";
+					}
+				}
 			}
 		}
 		return "single";
 	}
 
 	//call on this method for final name of molecule
-	public static String name(ArrayList<Atom> arr) {
-		new Nomenclature();
+	public static String name(Group[][] arr) {
 		String type = findType(arr);
 		String out = "";
+
 		if (type.equals("single")) {
-			ArrayList<Integer[]> indicesToCheck = findEdge(molecule);
-			for (Integer[] i: indicesToCheck) {
-				System.out.println(i);
+			ArrayList<Integer[]> indicesToCheck = findEdge(arr);
+			int longestIndex = 0;
+			int counter = 0;
+			int carbonChain = 0;
+			for (Integer[] i : indicesToCheck) {
+				//				carbonChain = countCarbons(molecule, i[0], i[1], 0, 0);
+				if (carbonChain > longest) {
+					longest = carbonChain;
+					longestIndex = counter;
+				}
+				counter++;
 			}
-			//			for (Integer i : indicesToCheck) {
-			//				findSingle(arr, indicesToCheck.get(i), 0);
-			//			}
-			int c = countCarbons(arr);
-			out += Nomenclature.oPrefixes.get(c);
+			System.out.println(carbonChain);
+			out += Nomenclature.oPrefixes.get(carbonChain);
 			out += "ane";
 		}
 		return out;
 	}
+
+	//finds branches of molecule
+	//	public static String findBranches(Group[][] arr, int row, int col) {
+	//		
+	//	}
 
 	public static ArrayList<Integer[]> findEdge(Group[][] arr) {
 		ArrayList<Integer[]> out = new ArrayList<>();
@@ -78,28 +94,30 @@ public class Molecule {
 		}
 		return out;
 	}
-
-	private static void findSingle(ArrayList<Atom> arr, int index, int counter) {
-		if (index == arr.size() || index == -1) {
-			return;
+	
+	public static void countCarbons(Group[][] arr, ArrayList<Integer[]> ends, int row, int col, int counter, int l) {
+		if (counter > longest) {		//updates length of longest carbon chain
+			longest = counter;			//only accounts for case where there's 1 definite longest chain
 		}
-		if (arr.get(index).getName().equals("Carbon")) {
+		if (row == arr.length || row == -1 || col == arr[0].length || col == -1) {	//return when out of bounds
+			return ;
+		}
+		if (arr[row][col] == null) {		//return when hits an empty index
+			return ;
+		}
+		if (arr[row][col].elements.get("carbon") != null) {	
+			System.out.println("row: " + row + " col: " + col + " counter: " + counter);
 			counter++;
+			arr[row][col] = null;
 		}
-		if (counter > longest) {
-			longest = counter;
-		}
-		findSingle(arr, index+1, counter);
-		findSingle(arr, index-1, counter);
-	}
-
-	private static int countCarbons(ArrayList<Atom> arr) {
-		int out = 0;
-		for (Atom a : arr) {
-			if (a.getName().equals("Carbon")) {
-				out++;
+		for (int i = 0; i < ends.size(); i++) {
+			if (i != l && row == ends.get(i)[0] && col == ends.get(i)[1]) {
+				return;
 			}
 		}
-		return out;
+		countCarbons(arr, ends, row, col+1, counter, longest);
+		countCarbons(arr, ends, row+1, col, counter, longest);
+		countCarbons(arr, ends, row, col-1, counter, longest);
+		countCarbons(arr, ends, row-1, col, counter, longest);
 	}
 }
