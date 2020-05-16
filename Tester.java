@@ -9,8 +9,8 @@ public class Tester {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String dummy = br.readLine();
 		while (!dummy.equals("")) {
-			int x = Integer.parseInt(dummy.substring(0, 1));
-			int y = Integer.parseInt(dummy.substring(2));
+			int x = Integer.parseInt(dummy.substring(0, dummy.indexOf(" ")));
+			int y = Integer.parseInt(dummy.substring(dummy.indexOf(" ") + 1));
 
 			if (!map.containsKey(x)) {
 				LinkedList<Integer> temp = new LinkedList<>();
@@ -24,17 +24,28 @@ public class Tester {
 			map.get(y).add(x); // map.get(y) is a LinkedList. Append x.
 			dummy = br.readLine();
 		}
+		
+		HashMap<Integer, Group> temp = new HashMap<>();
+		temp.put(1, new Group(3,1));
+		temp.put(2, new Group(2,1));
+		temp.put(3, new Group(3,1));
+		temp.put(4, new Group(3,1));
+		temp.put(5, new Group(2,1));
+		temp.put(6, new Group(1,1));
+		temp.put(7, new Group(3,1));
+		Molecule.group = new HashMap<>(temp);
 
 		Molecule.molecule = new HashMap<>(map);
 		Molecule.visited = new boolean[map.size() + 1];
 //		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
 		
-		Molecule.name("single");
-		System.out.println(Molecule.longest);
-		for (int i : Molecule.path) {
-			System.out.print(i + " ");
-		}
-
+		String name = Molecule.name("single");
+		System.out.println(name);
+		
+//		System.out.println(Molecule.longest);
+//		for (int i : Molecule.path) {
+//			System.out.print(i + " ");
+//		}
 		/*
 		 * used this input to test:
 1 2
@@ -43,6 +54,18 @@ public class Tester {
 4 5
 5 6
 6 7
+
+second test set
+1 2
+2 3
+2 6
+4 5
+5 6
+6 7
+7 8
+8 9
+9 10
+10 11
 		 */
 	}
 
