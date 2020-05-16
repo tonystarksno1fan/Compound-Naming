@@ -1,51 +1,34 @@
 import java.util.*;
-
+import java.io.*;
 public class Tester {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException{
 		// TODO Auto-generated method stub
 		new Nomenclature();
-		Group[][] mol = new Group[15][15];
-		for (int i = 0; i < 15; i++) {
-			for (int k = 0; k < 15; k++) {
-				if (i == 0 && (k == 2 || k == 6)) {
-					mol[i][k] = new Group(3, 1);
-				}
-				if (i == 0 && (k == 3 || k == 5)) {
-					mol[i][k] = new Group ("single");
-				}
-				if (i == 0 && k == 4) {
-					mol[i][k] = new Group (2,1);
-				}
-				if (i == 1 && k == 4) {
-					mol[i][k] = new Group ("single");
-				}
-				if (i == 2 && (k == 0 || k == 6)) {
-					mol[i][k] = new Group (3, 1);
-				}
-				if (i == 2 && (k == 1 || k == 3 || k == 5)) {
-					mol[i][k] = new Group ("single");
-				}
-				if (i == 2 && k == 2) {
-					mol[i][k] = new Group (2, 1);
-				}
-				if (i == 2 && k == 4) {
-					mol[i][k] = new Group (1, 1);
-				}
-//				System.out.print(mol[i][k] + " ");
+		Map<Integer, LinkedList<Integer>> map = new HashMap<>();
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String dummy = br.readLine();
+		while (!dummy.equals("")) {
+			int x = Integer.parseInt(dummy.substring(0, 1));
+			int y = Integer.parseInt(dummy.substring(2));
+
+			if (!map.containsKey(x)) {
+				LinkedList<Integer> temp = new LinkedList<>();
+				map.put(x, temp);
 			}
-//			System.out.println();
+			map.get(x).add(y); // map.get(x) is a LinkedList. Append y.
+			if (!map.containsKey(y)) {
+				LinkedList<Integer> temp = new LinkedList<>();
+				map.put(y, temp);
+			}
+			map.get(y).add(x); // map.get(y) is a LinkedList. Append x.
+			dummy = br.readLine();
 		}
-		ArrayList<Integer[]> arr = Molecule.findEdge(mol);
-		Molecule.countCarbons(mol, arr, 0, 2, 0, 0);
+		
+		Molecule.molecule = new HashMap<>(map);
+		Molecule.visited = new boolean[map.size()];
+		Molecule.findLongest(1, 0);
 		System.out.println(Molecule.longest);
-//		System.out.println(Molecule.name(mol));
-//		for (int i = 0; i < arr.size(); i++) {
-//			for (int k = 0; k < 2; k++) {
-//				System.out.print(arr.get(i)[k] + " ");
-//			}
-//			System.out.println();
-//		}
 	}
 
 }
