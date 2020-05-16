@@ -27,7 +27,9 @@ public class Tester {
 
 		Molecule.molecule = new HashMap<>(map);
 		Molecule.visited = new boolean[map.size() + 1];
-		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
+//		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
+		
+		Molecule.name("single");
 		System.out.println(Molecule.longest);
 		for (int i : Molecule.path) {
 			System.out.print(i + " ");
@@ -37,11 +39,10 @@ public class Tester {
 		 * used this input to test:
 1 2
 2 3
-2 4
-4 7
+2 6
+4 5
 5 6
 6 7
-7 8
 		 */
 	}
 

@@ -12,6 +12,8 @@ public class Molecule {
 		visited = new boolean[molecule.size() + 1];
 		if (type.equals("single")) {
 			findLongest(1, 0, new int[molecule.size() + 1], 0);
+			longest++;
+			path[longest-1] = molecule.get(path[longest-2]).getFirst();
 			out += Nomenclature.oPrefixes.get(longest);
 			out += "ane";
 		}
@@ -32,12 +34,17 @@ public class Molecule {
 		}
 		if (molecule.get(u) == null) {
 			// base case u does not have any kids
+			System.out.println("base case: " + u);
+			longest++;
+			path[arrCounter] = u;
 			return;
 		}
 		for (int v : molecule.get(u)) {
+			System.out.println("u: " + u + " child: " + v);
 			if (!visited[v]) {
 				visited[v] = true;
 				arr[arrCounter] = u;
+				System.out.println("added: " + u);
 				//				if (!group.get(v).equals("carbon")) { 		<= deal with this later w/ input groups
 				//					findLongest(v, counter);
 				//				}
