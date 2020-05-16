@@ -1,13 +1,17 @@
 import java.util.*;
 import java.io.*;
+
 public class Tester {
 
 	public static void main(String[] args) throws IOException{
-		// TODO Auto-generated method stub
 		new Nomenclature();
+		
 		Map<Integer, LinkedList<Integer>> map = new HashMap<>();
+		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		
 		String dummy = br.readLine();
+		
 		while (!dummy.equals("")) {
 			int x = Integer.parseInt(dummy.substring(0, dummy.indexOf(" ")));
 			int y = Integer.parseInt(dummy.substring(dummy.indexOf(" ") + 1));

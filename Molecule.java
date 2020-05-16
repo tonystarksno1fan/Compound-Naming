@@ -1,8 +1,10 @@
 import java.util.*;
+
 public class Molecule {
 	static Map<Integer, LinkedList<Integer>> molecule = new HashMap<>(); //stores the molecule as a graph -- using numbers for dfs purposes only
 	static HashMap<Integer, Group> group; //stores the group that corresponds with its number used in dfs
 	static boolean[] visited;
+	
 	static int[] path; 
 	static int longest = 0;	//length of longest carbon chain
 
