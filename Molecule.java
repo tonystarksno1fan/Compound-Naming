@@ -15,7 +15,7 @@ public class Molecule {
 		if (type.equals("single")) {
 			findLongest(1, 0, new int[molecule.size() + 1], 0);
 			longest++;
-			path[longest-1] = molecule.get(path[longest-2]).getFirst();
+			path[longest-1] = molecule.get(path[longest-2]).getLast();
 			out += findBranches();
 			out += Nomenclature.oPrefixes.get(longest);
 			out += "ane";
@@ -45,8 +45,8 @@ public class Molecule {
 						break;
 					}
 				}
-				if (!contains) {
-					map.put(i+1, group.get(k).name);
+				if (!contains) {	//where i = current alkyl group and k is its branch
+					map.put(i+1, getGroupName(i,k)); //only takes into account case where there's 1 alkyl branch
 				}
 				else if (contains) {
 					contains = false;
@@ -59,29 +59,43 @@ public class Molecule {
 		}
 		return out.substring(0, out.length()-1);
 	}
+	
+	public static String getGroupName(int temp, int cur) {
+		int counter = 0;
+		int previous = temp;
+		int current = cur;
+		
+		for (int i : molecule.get(current)) {
+			if (i != previous) {
+				counter++;
+				previous = current;
+				current = i;
+			}
+		}
+		
+		return (Nomenclature.oPrefixes.get(counter) + "yl");
+	}
 
-	public static void findLongest(int u, int counter, int[] arr, int arrCounter) {
-		visited[u] = true;
+	//where s is the start node, counter is the longest chain, arr is path, arrcounter tracks path
+	public static void findLongest(int s, int counter, int[] arr, int arrCounter) {
+		visited[s] = true;
 		if (counter > longest) {
 			longest = counter;
 			path = Arrays.copyOf(arr, arr.length);
 		}
-		if (molecule.get(u) == null) {
-			// base case u does not have any kids
-			System.out.println("base case: " + u);
-			longest++;
-			path[arrCounter] = u;
+		if (molecule.get(s) == null) {
+			// base case where u does not have any kids
 			return;
 		}
-		for (int v : molecule.get(u)) {
-			if (!visited[v]) {
-				visited[v] = true;
-				arr[arrCounter] = u;
+		for (int n : molecule.get(s)) {
+			if (!visited[n]) {
+				visited[n] = true;
+				arr[arrCounter] = s;
 				//				if (!group.get(v).equals("carbon")) { 		<= deal with this later w/ input groups
 				//					findLongest(v, counter);
 				//				}
 				//				else {
-				findLongest(v, counter+1, arr, arrCounter+1);
+				findLongest(n, counter+1, arr, arrCounter+1);
 				//				}
 			}
 		}
