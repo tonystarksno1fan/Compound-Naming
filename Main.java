@@ -142,24 +142,49 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
 			if(temp != null) {				
-				if(selected.getX() >= temp.getX() && (selected.angle == Math.PI || selected.angle == 0)) 		//Component is rotated 0 or 180 degrees, on the right
+				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
+						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
+						Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
+						(selected.angle == Math.PI || selected.angle == 0)) 										
+
 					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
 
-				else if(selected.getX() <= temp.getX() && (selected.angle == Math.PI || selected.angle == 0)) 	//Component is rotated 0 or 180 degrees, on the left
+				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Component is on the left
+						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
+						Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
+						(selected.angle == Math.PI || selected.angle == 0))
+					
 					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
-
-				else if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Component is rotated and blow target					
-					int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
-					int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
-										
-					selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
-				}
 				
-				else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Component is rotated and blow target					
-					int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
-					int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
-										
-					selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Above
+						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2)
+					
+					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
+
+				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Below
+						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+					
+					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
+
+				if(!selected.getType().equalsIgnoreCase("atom")) {		//Only apply these transformations for bonds
+					if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is below target					
+						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
+						int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+
+						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+					}
+					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is above target					
+						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
+						int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+
+						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+					}
+				} 
+				else if(selected.getType().equalsIgnoreCase("atom") && !temp.getType().equalsIgnoreCase("atom") && temp.angle != 0 && temp.angle != Math.PI) {
+					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
+					else 
+						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
 				}
 
 				if(temp.group>=0) {
@@ -170,7 +195,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 							groupList.get(temp.group).add(groupList.get(index).get(i));
 							groupList.get(index).get(i).group = temp.group;
 						}
-
 
 						groupList.remove(index);
 					}
