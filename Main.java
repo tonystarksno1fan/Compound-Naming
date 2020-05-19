@@ -276,7 +276,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			//System.out.println(map.size());
 
 			export.entrySet().forEach(entry->{
-				System.out.println(entry.getKey() + " : " + entry.getValue());  
+				System.out.println(entry.getKey() + " : " + entry.getValue().getNums());  
 			});
 			System.out.println();
 
