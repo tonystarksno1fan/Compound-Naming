@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Main implements ActionListener, KeyListener, MouseListener {
 	public static final int height = 700;	//Frame dimensions
-	public static final int width = 1000;
+	public static final int width = 1000; 	
 
 	public static int mouseX;
 	public static int mouseY;
@@ -15,16 +15,21 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static ArrayList<Atom> atomList = new ArrayList<Atom>();				//Will draw contents onto main panel (see comments at the JSplitPane declaration)
 	public static ArrayList<Atom> placeboList = new ArrayList<Atom>();			//Will draw contents onto right side-panel
 
-	public static ArrayList<ArrayList<Atom>> groupList = new ArrayList<ArrayList<Atom>>();
-	
-	public static HashMap<Integer, Group> groupMap = new HashMap<Integer, Group>();
-	public static int groupX;
-	public static int groupY;
+	public static ArrayList<ArrayList<Atom>> groupList = new ArrayList<ArrayList<Atom>>();		//List of groups (not for the Group class)
+
+	public static HashMap<Integer, Group> export = new HashMap<>();				//HashMap to be exported to Molecule
+	public static Map<Integer, LinkedList<Integer>> map = new HashMap<>();
+
+	public static int hydrogenCount = 0;										//To be used for compiling and exporting
+	public static int carbonCount = 0;
 
 	public static JFrame frame;
 	public static final JSplitPane splitPane = new JSplitPane();	//Used to combine two JPanels side by side in a single JFrame
-	public static final JPanel panel = new Canvas();				//Main panel where the molecule stuff happens
-	private static final JPanel controls = new CanvasTwo();			//Right side-panel for dragging components from
+	public static final JSplitPane splitPaneTop = new JSplitPane();	//Top controls
+
+	private static final JPanel panel = new Canvas();				//Main panel where the molecule stuff happens
+	private static final JPanel menu = new CanvasTwo();				//Right side-panel for dragging components from
+	private static final JPanel controls = new JPanel();			//Top panel use for controls
 
 	public Main() {
 		frame = new JFrame("Wowowowowow");	
@@ -40,19 +45,31 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		panel.addMouseMotionListener(motionListener);
 		panel.setName("panel");
 
-		controls.addMouseListener(this);
-		controls.addMouseMotionListener(motionListener);
-		controls.setName("controls");
+		menu.addMouseListener(this);
+		menu.addMouseMotionListener(motionListener);
+		menu.setName("controls");
 
-		frame.getContentPane().setLayout(new GridLayout());
-		frame.getContentPane().add(splitPane);
+		JButton compile = new JButton("Compile");
+		compile.addActionListener(this);
+		compile.setActionCommand("compile");
+		controls.add(compile);
 
 		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setDividerLocation(width-240);
 		//splitPane.setDividerSize(0);
 		splitPane.setEnabled(false);
-		splitPane.setRightComponent(controls);
+		splitPane.setRightComponent(menu);
 		splitPane.setLeftComponent(panel);
+
+		splitPaneTop.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		splitPaneTop.setDividerLocation(40);
+		//splitPaneTop.setDividerSize(0);
+		splitPaneTop.setEnabled(false);
+		splitPaneTop.setTopComponent(controls);
+		splitPaneTop.setBottomComponent(splitPane);
+
+		frame.getContentPane().setLayout(new GridLayout());
+		frame.getContentPane().add(splitPaneTop);
 
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -60,14 +77,14 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 		placeboList.add(new Atom("C", 20, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("H", 90, 20, 20, 20, "atom"));
-		placeboList.add(new Atom("Single Bond", 50, 20, 30, 10, "singleBond"));
-		placeboList.add(new Atom("Double Bond", 120, 20, 30, 10, "doubleBond"));
+		placeboList.add(new Atom("Single Bond", 50, 20, 30, 10, "bond"));
+		placeboList.add(new Atom("Double Bond", 120, 20, 30, 10, "bond"));
 
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
 				while(true) {
 					panel.repaint();
-					controls.repaint();
+					menu.repaint();
 					try {Thread.sleep(20);} catch (Exception ex) {}	//20 millisecond delay between each refresh
 				}
 			}
@@ -84,7 +101,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void keyTyped(KeyEvent e) {}
 	public void keyPressed(KeyEvent e) {}
 
-	public void keyReleased(KeyEvent e) {
+	public void keyReleased(KeyEvent e) {									//A to rotate selected object left, B to rotate right
 		if(selected != null) {
 			if(e.getKeyCode() == KeyEvent.VK_A) selected.rotateLeft();
 			else if(e.getKeyCode() == KeyEvent.VK_D) selected.rotateRight();
@@ -148,26 +165,26 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			if(temp != null) {		
 				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-						Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-						(selected.angle == Math.PI || selected.angle == 0)) 										
+				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
+				(selected.angle == Math.PI || selected.angle == 0)) 										
 
 					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
 
 				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Component is on the left
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-						Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-						(selected.angle == Math.PI || selected.angle == 0))
-					
+				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
+				(selected.angle == Math.PI || selected.angle == 0))
+
 					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
-				
+
 				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Above
 						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2)
-					
+
 					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
 
 				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Below
 						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
-					
+
 					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
 
 				if(!selected.getType().equalsIgnoreCase("atom")) {		//Only apply these transformations for bonds
@@ -189,6 +206,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
 					else 
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
+				}
+
+				if(!selected.matchList(temp, selected.bondedElements)) {
+					selected.bondedElements.add(temp);
+					temp.bondedElements.add(selected);
 				}
 
 				if(temp.group>=0) {
@@ -229,12 +251,155 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 
-	public void actionPerformed(ActionEvent e) {		//A to rotate selected object left, B to rotate right
-		if(e.getActionCommand().equals("addAtom")) atomList.add(new Atom("C", 250, 25, 20, 20, "atom"));
+	public void actionPerformed(ActionEvent e) {
+		if(e.getActionCommand().equals("compile")) {				
+			if(selected == null || selected.group < 0 || selected.getType().equalsIgnoreCase("bond")) {
+				JOptionPane.showMessageDialog(null, "Please select an Atom within a group first");
+				return;
+			}
 
-		else if(e.getActionCommand().equals("addSingleBond")) atomList.add(new Atom("Single Bond", 250, 25, 20, 10, "singleBond"));
+			export.clear();													//Reset export hashmap
+
+			for(int i=0; i<atomList.size(); i++)							//Reset previous compile markers
+				atomList.get(i).counted = 0;
+
+			for(Atom temp : groupList.get(selected.group))					//Switch to rightmost atom of the selected group
+				if(temp.getX() < selected.getX())
+					selected = temp;
+
+			compile(selected, new ArrayList<Atom>(), new ArrayList<Atom>());
+
+			//System.out.println(export.size() + "\n");
+
+			new Nomenclature();
+
+			//System.out.println(map.size());
+
+			export.entrySet().forEach(entry->{
+				System.out.println(entry.getKey() + " : " + entry.getValue());  
+			});
+			System.out.println();
+
+			map.entrySet().forEach(aa->{
+				int num = aa.getKey();
+				LinkedList<Integer> temp = aa.getValue();
+				for(int m=0; m<temp.size(); m++) {
+					System.out.println(num + " : " + temp.get(m));
+				}
+			});
+
+			Molecule.group = new HashMap<>(export);
+			Molecule.molecule = new HashMap<>(map);
+			Molecule.visited = new boolean[map.size() + 1];
+
+			String name = Molecule.name("single");
+			System.out.println(name);
+		}
 
 		frame.requestFocus();
+	}
+
+	public static void compile(Atom atom, ArrayList<Atom> bonds, ArrayList<Atom> checked) {
+		if(!atom.matchList(atom, checked)) {
+			//System.out.println("debug: first layer : " + atom.bondedElements.size() + ", " + atom.getName());
+
+			if(atom.getType().equalsIgnoreCase("bond")) {
+				//System.out.println("debug: second layer : bond");
+
+				bonds.add(atom);
+				checked.add(atom);
+			}
+			else {
+				//System.out.println("debug: second layer : Atom: " + atom.getName());
+
+				checked.add(atom);
+
+				if(atom.getName().equalsIgnoreCase("H")) {
+					hydrogenCount++;
+
+					for(int i=0; i<atom.bondedElements.size(); i++)
+						if(!atom.matchList(atom.bondedElements.get(i), checked))
+							compile(atom.bondedElements.get(i), bonds, checked);
+				}
+				else if(atom.getName().equalsIgnoreCase("C")) {						
+					carbonCount++;
+
+					for(int i=0; i<atom.bondedElements.size(); i++)
+						if(!atom.matchList(atom.bondedElements.get(i), checked))
+							compile(atom.bondedElements.get(i), bonds, checked);
+				}
+
+				for(int j=0; j<atom.bondedElements.size(); j++) {
+					if(!atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond")) 
+						compile(atom.bondedElements.get(j), bonds, checked);
+					else if(atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond") 
+							&& j == atom.bondedElements.size()-1) 
+						compile(atom, bonds, checked);
+				}
+			}
+		}
+		else {			
+			if(atom.getType().equalsIgnoreCase("bond")) return;
+
+			//System.out.println("endgame: " + atom.getName());
+
+			for(int j=0; j<checked.size(); j++) {
+
+				if(!checked.get(j).getType().equalsIgnoreCase("bond")) {
+
+					for(int k=0; k<checked.get(j).bondedElements.size(); k++) {		
+
+						if(!atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond")) 
+							compile(checked.get(j).bondedElements.get(k), bonds, checked);
+
+						else if(atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond") 
+								&& k == checked.get(j).bondedElements.size()-1 && atom.counted<1) {
+
+							if(hydrogenCount == 0 && carbonCount == 0) return;
+
+							//System.out.println("endgame: " + atom.getName() + ", " + k + ", " + (checked.get(j).bondedElements.size()-1));
+
+							//System.out.println((export.size()+1) + " : " + hydrogenCount + ", " + carbonCount);							
+
+							export.put(export.size()+1, new Group(hydrogenCount, carbonCount));
+							hydrogenCount = 0;
+							carbonCount = 0;
+
+							for(int m=0; m<atom.bondedElements.size(); m++)
+								if(atom.bondedElements.get(m).getType().equals("atom"))
+									atom.bondedElements.get(m).counted = export.size()+1;
+							atom.counted = export.size()+1;
+
+							for(int a=0; a<bonds.size(); a++) {
+								for(int b=0; b<bonds.get(a).bondedElements.size(); b++) {
+									if(bonds.get(a).bondedElements.get(b).counted > 0 && bonds.get(a).bondedElements.get(b).counted != atom.counted) {	
+										
+										int c = bonds.get(a).bondedElements.get(b).counted-1;
+										int v = atom.counted-1;
+
+										if(!map.containsKey(c))
+											map.put(c, new LinkedList<>());
+										map.get(c).add(v);
+
+										if(!map.containsKey(v))
+											map.put(v, new LinkedList<>());
+										map.get(v).add(c);
+									}
+								}
+							}
+
+							if(bonds.size() > 0)
+								for(int l=0; l<bonds.size(); l++)
+									for(int n=0; n<bonds.get(l).bondedElements.size(); n++)
+										if(!atom.matchList(bonds.get(l).bondedElements.get(n), checked))
+											compile(bonds.get(l).bondedElements.get(n), new ArrayList<Atom>(Arrays.asList(bonds.get(l))), checked);
+
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public static class Canvas extends JPanel {		//Responsible for drawing onto the main screen (the portion that does not contain the controls)
