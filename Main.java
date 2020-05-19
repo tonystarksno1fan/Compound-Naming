@@ -271,8 +271,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 			//System.out.println(export.size() + "\n");
 
-			new Nomenclature();
-
 			//System.out.println(map.size());
 
 			export.entrySet().forEach(entry->{
@@ -288,6 +286,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				}
 			});
 
+			new Nomenclature();
+			
 			Molecule.group = new HashMap<>(export);
 			Molecule.molecule = new HashMap<>(map);
 			Molecule.visited = new boolean[map.size() + 1];
