@@ -273,12 +273,12 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 			//System.out.println(map.size());
 
-			export.entrySet().forEach(entry->{
-				System.out.println(entry.getKey() + " : " + entry.getValue().getNums());  
-			});
+			export.entrySet().forEach(entry->{													//Prints Group class with the number of hydrogens and carbons
+				System.out.println(entry.getKey() + " : " + entry.getValue().getNums());  		//export is the temp HashMap from Tester
+			});																					//map is map
 			System.out.println();
 
-			map.entrySet().forEach(aa->{
+			map.entrySet().forEach(aa->{														//Prints which nodes are connected to each other
 				int num = aa.getKey();
 				LinkedList<Integer> temp = aa.getValue();
 				for(int m=0; m<temp.size(); m++) {
@@ -286,7 +286,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				}
 			});
 
-			new Nomenclature();
+			new Nomenclature();																	//This is just copied from Tester pretty much
 			
 			Molecule.group = new HashMap<>(export);
 			Molecule.molecule = new HashMap<>(map);
