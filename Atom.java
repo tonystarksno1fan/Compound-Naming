@@ -18,9 +18,9 @@ public class Atom extends JPanel {
 	private int dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private int dy;
 
-	private HashMap<String, Integer> bondedElements = new HashMap<String, Integer>(); //Atoms bonded to current atom object
+	public ArrayList<Atom> bondedElements = new ArrayList<Atom>();
+	public int counted = 1;
 
-	private int groupBonds = 0;
 	public int group = -1;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {
@@ -47,12 +47,12 @@ public class Atom extends JPanel {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
-		else if(type.equalsIgnoreCase("singleBond")) {										//Draw single bond
+		else if(name.equalsIgnoreCase("single bond")) {										//Draw single bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/2, lastX+objectW, lastY+objectH/2);
 		}
-		else if(type.equalsIgnoreCase("doubleBond")) {										//Draw double bond
+		else if(name.equalsIgnoreCase("double bond")) {										//Draw double bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/3, lastX+objectW, lastY+objectH/3);
@@ -95,7 +95,8 @@ public class Atom extends JPanel {
 
 					if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
 							(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
-						System.out.println("collision");
+						//System.out.println("collision");
+						
 						return temp;
 					}
 				}
@@ -146,7 +147,7 @@ public class Atom extends JPanel {
 		return false;		
 	}
 
-	public void addElement(String name) {
+	/*public void addElement(String name) {
 		if (bondedElements.containsKey(name)) {
 			bondedElements.replace(name, bondedElements.get(name)+1);
 		}
@@ -154,14 +155,9 @@ public class Atom extends JPanel {
 			bondedElements.put(name, 1);
 		}
 	}
-
 	public Integer getElement(String name) {
 		return bondedElements.get(name);
-	}
-
-	public int getBonds() {
-		return groupBonds;
-	}
+	} */
 
 	public int getX() {
 		return lastX;
