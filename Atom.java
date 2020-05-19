@@ -1,22 +1,5 @@
-/*
-	Snappier component connections
-	Component rotation
-	Directional Component Attachment 
-		- Available for 0, 90, 180, 270 degrees clockwise and counterclockwise rotations
-		- Yes, you can make a crude swastika
-		
-	Better graphics
-	
-	JAVA HAS ANTI-ALIASING?????????? These circles now be looking fineeee
-		- Used 16% of my GPU tho lmao
-		- That should probably be a settings option
-		
-	Updated objectCollision method
-*/
-
 import java.util.*;
 import java.awt.*;
-
 import javax.swing.*;
 
 public class Atom extends JPanel {
@@ -112,7 +95,7 @@ public class Atom extends JPanel {
 
 					if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
 							(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
-						
+						System.out.println("collision");
 						return temp;
 					}
 				}
@@ -144,11 +127,15 @@ public class Atom extends JPanel {
 	}
 
 	public void rotateRight() {
+		if(type.equalsIgnoreCase("atom")) return;
+		
 		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
 		else angle += Math.PI/4;
 	}
 
 	public void rotateLeft() {
+		if(type.equalsIgnoreCase("atom")) return;
+		
 		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
 		else angle -= Math.PI/4;
 	}

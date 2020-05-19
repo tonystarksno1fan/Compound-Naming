@@ -16,6 +16,10 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static ArrayList<Atom> placeboList = new ArrayList<Atom>();			//Will draw contents onto right side-panel
 
 	public static ArrayList<ArrayList<Atom>> groupList = new ArrayList<ArrayList<Atom>>();
+	
+	public static HashMap<Integer, Group> groupMap = new HashMap<Integer, Group>();
+	public static int groupX;
+	public static int groupY;
 
 	public static JFrame frame;
 	public static final JSplitPane splitPane = new JSplitPane();	//Used to combine two JPanels side by side in a single JFrame
@@ -127,7 +131,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 		if(((JPanel)e.getSource()).getName().equals("panel")) {
 			for(int i=0; i<atomList.size(); i++) {
-				Atom temp = atomList.get(i);			
+				Atom temp = atomList.get(i);
 				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
 					selected = temp;
 				}
@@ -141,7 +145,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
-			if(temp != null) {				
+			if(temp != null) {		
 				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
 						Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
