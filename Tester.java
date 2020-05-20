@@ -41,19 +41,23 @@ public class Tester {
 		temp.put(9, new Group(2,1));
 		temp.put(10, new Group(2,1));
 		temp.put(11, new Group(3,1));
-		Molecule.group = new HashMap<>(temp);
-
-		Molecule.molecule = new HashMap<>(map);
-		Molecule.visited = new boolean[map.size() + 1];
-		Molecule.path = new int[map.size()][map.size()];
-//		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
 		
-		String name = Molecule.name("single");
+		Molecule mol = new Molecule(map, temp, "single");
+		System.out.println(mol.name("single"));
+		
+//		Molecule.group = new HashMap<>(temp);
+
+//		Molecule.molecule = new HashMap<>(map);
+//		Molecule.visited = new boolean[map.size() + 1];
+//		Molecule.path = new int[map.size()][map.size()];
+////		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
+//		
+//		String name = Molecule.name("single");
 //		for (int i : Molecule.path) {
 //			System.out.print(i + " ");
 //		}
 //		System.out.println();
-		System.out.println(name);
+//		System.out.println(name);
 		
 //		System.out.println(Molecule.longest);
 //		for (int i : Molecule.path) {

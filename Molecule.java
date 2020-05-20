@@ -1,26 +1,36 @@
 import java.util.*;
 
 public class Molecule {
-	static Map<Integer, LinkedList<Integer>> molecule = new HashMap<>(); //stores the molecule as a graph -- using numbers for dfs purposes only
-	static HashMap<Integer, Group> group; //stores the group that corresponds with its number used in dfs
-	static boolean[] visited;
+	Map<Integer, LinkedList<Integer>> molecule; //stores the molecule as a graph -- using numbers for dfs purposes only
+	HashMap<Integer, Group> group; //stores the group that corresponds with its number used in dfs
+	boolean[] visited;
 	String bondType;
-	static int[][] path = new int[molecule.size()][molecule.size()]; //an array of all possible paths
-	static int longest = 0;	//length of longest carbon chain
+	int[][] path; //an array of all possible paths
+	int longest = 0;	//length of longest carbon chain
+	
+	public Molecule(Map<Integer, LinkedList<Integer>> map, HashMap<Integer, Group> group, String type) {
+		molecule = new HashMap<>(map);
+		this.group = new HashMap<>(group);
+		bondType = type;
+		path = new int[molecule.size()][molecule.size()];
+	}
 
 	//call on this method for final name of molecule
-	public static String name(String type) {
+	public String name() {
 		String out = "";
-		visited = new boolean[molecule.size() + 1];
-		if (type.equals("single")) {
+		if (bondType.equals("single")) {
 			for (int i = 0; i < molecule.size(); i++) {
+				visited = new boolean[molecule.size() + 1];
 				findPaths(i, i+1, 0, new int[molecule.size()], 0);	//finds every possible carbon chain path
 				longest++;
 				path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
+				
+				/*
+				 * run dfs twice
+				 * create an arraylist of the farthest groups
+				 */
+				
 				longest = 0;
-				for (int q = 0; q < visited.length; q++) {
-					visited[q] = false;
-				}
 			}
 			ArrayList<Integer> paths = longestPath(path);		//narrows it down to only the longest paths
 			if (paths.size() > 1) {
@@ -33,16 +43,16 @@ public class Molecule {
 			out += Nomenclature.oPrefixes.get(longest);
 			out += "ane";
 		}
-		else if (type.equals("double")) {
+		else if (bondType.equals("double")) {
 
 		}
-		else if (type.equals("triple")) {
+		else if (bondType.equals("triple")) {
 
 		}
 		return out;
 	}
 
-	public static int lowestNumerals(ArrayList<Integer> arr) {	//finds the path with the lowest numeral branches
+	public int lowestNumerals(ArrayList<Integer> arr) {	//finds the path with the lowest numeral branches
 		int[] lowest = new int[arr.size()];
 		for (int i = 0; i < arr.size(); i++) {
 			lowest[i] = leastBranch(arr.get(i));
@@ -58,7 +68,7 @@ public class Molecule {
 	}
 
 	//finds the branches of the alkyl groups 
-	public static String findBranches(int n) {
+	public String findBranches(int n) {
 		boolean contains = false;
 		HashMap<Integer, String> map = new HashMap<>();	//tracks where the branch occurs and what the branch is called
 		String out = "";
@@ -88,7 +98,7 @@ public class Molecule {
 		return out.substring(0, out.length()-1);
 	}
 
-	public static int leastBranch(int p) {		//where int p = row of path
+	public int leastBranch(int p) {		//where int p = row of path
 		boolean contains = false;
 		ArrayList<Integer> arr = new ArrayList<>();	//tracks indices of branches
 		for (int i = 0; i < path[p].length; i++) {		//cycles through the indices of the carbons on the longest carbon chain
@@ -115,7 +125,7 @@ public class Molecule {
 	}
 
 	//determines the longest path out of all the possible ones. outputs the row(s) of the longest chain
-	public static ArrayList<Integer> longestPath(int[][] arr) {
+	public ArrayList<Integer> longestPath(int[][] arr) {
 		ArrayList<Integer> out = new ArrayList<>();
 		int l = 0;
 		for (int i = 0; i < arr.length; i++) {	//goes through all rows of the array to determine the path of greatest
@@ -146,7 +156,7 @@ public class Molecule {
 		return out;
 	}
 
-	public static String getGroupName(int temp, int cur) {
+	public String getGroupName(int temp, int cur) {
 		int counter = 0;
 		int previous = temp;
 		int current = cur;
@@ -163,7 +173,7 @@ public class Molecule {
 	}
 
 	//where s is the start node, counter is the longest chain, arr is path, arrcounter tracks path
-	public static void findPaths(int i, int s, int counter, int[] arr, int arrCounter) {
+	public void findPaths(int i, int s, int counter, int[] arr, int arrCounter) {
 		visited[s] = true;
 		if (counter > longest) {
 			longest = counter;
