@@ -18,7 +18,7 @@ public class Atom extends JPanel {
 	private int dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private int dy;
 
-	public ArrayList<Atom> bondedElements = new ArrayList<Atom>();
+	public Atom[] bondedElements = new Atom[] {null, null, null, null};
 	public int counted = 1;
 
 	public int group = -1;
@@ -40,7 +40,7 @@ public class Atom extends JPanel {
 
 		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		gg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-		
+
 		Stroke defaultStroke = gg.getStroke();
 
 		if(type.equalsIgnoreCase("atom")) {													//Draw atoms
@@ -88,16 +88,19 @@ public class Atom extends JPanel {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
 
-				if(		(lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
-						(lastY+objectH <= temp.lastY+temp.objectH && lastY+objectH >= temp.lastY) ||
-						(lastY >= temp.lastY && lastY+objectH <= temp.lastY+temp.objectH) ||
-						(angle!=0 && angle!=Math.PI && lastY+objectW <= temp.lastY+temp.objectH && lastY+objectW >= temp.lastY)) {
+				if(temp.group < 0 || temp.group != group) {
+					if(		(lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
+							(lastY+objectH <= temp.lastY+temp.objectH && lastY+objectH >= temp.lastY) ||
+							(lastY >= temp.lastY && lastY+objectH <= temp.lastY+temp.objectH) ||
+							(lastY <= temp.lastY && lastX+objectH >= temp.lastY+temp.objectH) ||
+							(angle!=0 && angle!=Math.PI && lastY+objectW <= temp.lastY+temp.objectH && lastY+objectW >= temp.lastY)) {
 
-					if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
-							(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
-						//System.out.println("collision");
-						
-						return temp;
+						if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
+								(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
+							//System.out.println("collision");
+
+							return temp;
+						}
 					}
 				}
 			}
@@ -129,14 +132,14 @@ public class Atom extends JPanel {
 
 	public void rotateRight() {
 		if(type.equalsIgnoreCase("atom")) return;
-		
+
 		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
 		else angle += Math.PI/4;
 	}
 
 	public void rotateLeft() {
 		if(type.equalsIgnoreCase("atom")) return;
-		
+
 		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
 		else angle -= Math.PI/4;
 	}

@@ -135,7 +135,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			}
 			else {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
-				else selected.updateLocation(mouseX, mouseY);
+				else 
+					selected.updateLocation(mouseX, mouseY);
 			}
 		}
 
@@ -162,89 +163,128 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
+			boolean connect = true;
+
 			if(temp != null) {		
 				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
 				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-				(selected.angle == Math.PI || selected.angle == 0)) 										
+				(selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[1] == null && selected.bondedElements[3] == null) {	
+
+					temp.bondedElements[1] = selected;
+					selected.bondedElements[3] = temp;
 
 					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+				}
 
 				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Component is on the left
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
 				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-				(selected.angle == Math.PI || selected.angle == 0))
+				(selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[3] == null && selected.bondedElements[1] == null) {
+
+					temp.bondedElements[3] = selected;
+					selected.bondedElements[1] = temp;
 
 					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
-
-				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Above
-						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2)
-
-					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
+				}
 
 				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Below
-						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2 && temp.bondedElements[2] == null && selected.bondedElements[0] == null) {
+
+					temp.bondedElements[2] = selected;
+					selected.bondedElements[0] = temp;
+
+					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
+				}
+
+				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Above
+						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2 && temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
+
+					temp.bondedElements[0] = selected;
+					selected.bondedElements[2] = temp;
 
 					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
+				}
+
+				else {
+					connect = false;
+					System.out.println("aliug");
+				}
 
 				if(!selected.getType().equalsIgnoreCase("atom")) {		//Only apply these transformations for bonds
-					if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is below target					
+					if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI
+							&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {	//Rotated component is below target		
+						
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
 
+						temp.bondedElements[2] = selected;
+						selected.bondedElements[0] = temp;
+						
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
-					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is above target					
+					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI
+							&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {	//Rotated component is above target			
+						
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
 
+						temp.bondedElements[0] = selected;
+						selected.bondedElements[2] = temp;
+						
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
 				} 
 				else if(selected.getType().equalsIgnoreCase("atom") && !temp.getType().equalsIgnoreCase("atom") && temp.angle != 0 && temp.angle != Math.PI) {
-					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2 && temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
+						
+						temp.bondedElements[0] = selected;
+						selected.bondedElements[2] = temp;
+						
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
-					else 
+					}
+					else if(temp.bondedElements[2] == null && selected.bondedElements[0] == null)
+					
+						temp.bondedElements[2] = selected;
+						selected.bondedElements[0] = temp;
+						
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
 				}
 
-				if(!selected.matchList(temp, selected.bondedElements)) {
-					selected.bondedElements.add(temp);
-					temp.bondedElements.add(selected);
-				}
+				if(connect) {
+					if(temp.group>=0) {
+						if(selected.group>=0 && selected.group>temp.group) {
+							int index = selected.group;
 
-				if(temp.group>=0) {
-					if(selected.group>=0 && selected.group>temp.group) {
-						int index = selected.group;
+							for(int i=0; i<groupList.get(index).size(); i++) {
+								groupList.get(temp.group).add(groupList.get(index).get(i));
+								groupList.get(index).get(i).group = temp.group;
+							}
 
-						for(int i=0; i<groupList.get(index).size(); i++) {
-							groupList.get(temp.group).add(groupList.get(index).get(i));
-							groupList.get(index).get(i).group = temp.group;
+							groupList.remove(index);
 						}
 
-						groupList.remove(index);
+						else if(selected.group<0) {								
+							groupList.get(temp.group).add(selected);
+							selected.group = temp.group;
+
+						}
 					}
-
-					else if(selected.group<0) {								
-						groupList.get(temp.group).add(selected);
-						selected.group = temp.group;
-
+					else if(temp.group<0) {
+						if(selected.group>0) {
+							temp.group = selected.group;
+							groupList.get(selected.group).add(temp);
+						}
+						else {
+							groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+							selected.group = groupList.size()-1;
+							temp.group = groupList.size()-1;
+						}
 					}
 				}
-				else if(temp.group<0) {
-					if(selected.group>0) {
-						temp.group = selected.group;
-						groupList.get(selected.group).add(temp);
-					}
-					else {
-						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
-						selected.group = groupList.size()-1;
-						temp.group = groupList.size()-1;
-					}
-				}
+
+				if(selected.getX() > width-240) atomList.remove(selected);
 			}
-
-			if(selected.getX() > width-240) atomList.remove(selected);
 		}
 	}
 
@@ -287,7 +327,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			});
 
 			new Nomenclature();																	//This is just copied from Tester pretty much
-			
+
 			Molecule.group = new HashMap<>(export);
 			Molecule.molecule = new HashMap<>(map);
 			Molecule.visited = new boolean[map.size() + 1];
@@ -317,28 +357,28 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				if(atom.getName().equalsIgnoreCase("H")) {
 					hydrogenCount++;
 
-					for(int i=0; i<atom.bondedElements.size(); i++)
-						if(!atom.matchList(atom.bondedElements.get(i), checked))
-							compile(atom.bondedElements.get(i), bonds, checked);
+					for(int i=0; i<4; i++)
+						if(!atom.matchList(atom.bondedElements[i], checked))
+							compile(atom.bondedElements[i], bonds, checked);
 				}
 				else if(atom.getName().equalsIgnoreCase("C")) {						
 					carbonCount++;
 
-					for(int i=0; i<atom.bondedElements.size(); i++)
-						if(!atom.matchList(atom.bondedElements.get(i), checked))
-							compile(atom.bondedElements.get(i), bonds, checked);
+					for(int i=0; i<4; i++)
+						if(!atom.matchList(atom.bondedElements[i], checked))
+							compile(atom.bondedElements[i], bonds, checked);
 				}
 
-				for(int j=0; j<atom.bondedElements.size(); j++) {
-					if(!atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond")) 
-						compile(atom.bondedElements.get(j), bonds, checked);
-					else if(atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond") 
-							&& j == atom.bondedElements.size()-1) 
+				for(int j=0; j<4; j++) {
+					if(!atom.matchList(atom.bondedElements[j], checked) && !atom.getType().equalsIgnoreCase("bond")) 
+						compile(atom.bondedElements[j], bonds, checked);
+					else if(atom.matchList(atom.bondedElements[j], checked) && !atom.getType().equalsIgnoreCase("bond") 
+							&& j == 3) 
 						compile(atom, bonds, checked);
 				}
 			}
 		}
-		else {			
+		else {
 			if(atom.getType().equalsIgnoreCase("bond")) return;
 
 			//System.out.println("endgame: " + atom.getName());
@@ -347,13 +387,13 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 				if(!checked.get(j).getType().equalsIgnoreCase("bond")) {
 
-					for(int k=0; k<checked.get(j).bondedElements.size(); k++) {		
+					for(int k=0; k<checked.get(j).bondedElements.length; k++) {		
 
-						if(!atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond")) 
-							compile(checked.get(j).bondedElements.get(k), bonds, checked);
+						if(!atom.matchList(checked.get(j).bondedElements[k], checked) && !checked.get(j).getType().equalsIgnoreCase("bond")) 
+							compile(checked.get(j).bondedElements[k], bonds, checked);
 
-						else if(atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond") 
-								&& k == checked.get(j).bondedElements.size()-1 && atom.counted<1) {
+						else if(atom.matchList(checked.get(j).bondedElements[k], checked) && !checked.get(j).getType().equalsIgnoreCase("bond") 
+								&& k == 3 && atom.counted<1) {
 
 							if(hydrogenCount == 0 && carbonCount == 0) return;
 
@@ -365,16 +405,16 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 							hydrogenCount = 0;
 							carbonCount = 0;
 
-							for(int m=0; m<atom.bondedElements.size(); m++)
-								if(atom.bondedElements.get(m).getType().equals("atom"))
-									atom.bondedElements.get(m).counted = export.size()+1;
+							for(int m=0; m<4; m++)
+								if(atom.bondedElements[m].getType().equals("atom"))
+									atom.bondedElements[m].counted = export.size()+1;
 							atom.counted = export.size()+1;
 
 							for(int a=0; a<bonds.size(); a++) {
-								for(int b=0; b<bonds.get(a).bondedElements.size(); b++) {
-									if(bonds.get(a).bondedElements.get(b).counted > 0 && bonds.get(a).bondedElements.get(b).counted != atom.counted) {	
-										
-										int c = bonds.get(a).bondedElements.get(b).counted-1;
+								for(int b=0; b<4; b++) {
+									if(bonds.get(a).bondedElements[b].counted > 0 && bonds.get(a).bondedElements[b].counted != atom.counted) {	
+
+										int c = bonds.get(a).bondedElements[b].counted-1;
 										int v = atom.counted-1;
 
 										if(!map.containsKey(c))
@@ -390,9 +430,9 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 							if(bonds.size() > 0)
 								for(int l=0; l<bonds.size(); l++)
-									for(int n=0; n<bonds.get(l).bondedElements.size(); n++)
-										if(!atom.matchList(bonds.get(l).bondedElements.get(n), checked))
-											compile(bonds.get(l).bondedElements.get(n), new ArrayList<Atom>(Arrays.asList(bonds.get(l))), checked);
+									for(int n=0; n<4; n++)
+										if(!atom.matchList(bonds.get(l).bondedElements[n], checked))
+											compile(bonds.get(l).bondedElements[n], new ArrayList<Atom>(Arrays.asList(bonds.get(l))), checked);
 
 							return;
 						}
