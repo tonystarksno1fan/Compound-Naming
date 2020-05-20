@@ -22,6 +22,8 @@ public class Atom extends JPanel {
 	public int counted = 1;
 
 	public int group = -1;
+	
+	public int groupNumber;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {
 		this.name = name;
@@ -159,6 +161,7 @@ public class Atom extends JPanel {
 		return bondedElements.get(name);
 	} */
 
+	//getters
 	public int getX() {
 		return lastX;
 	}
@@ -182,7 +185,16 @@ public class Atom extends JPanel {
 	public String getType() {
 		return type;
 	}
+	
+	public int getGroup() {
+		return groupNumber;
+	}
 
+	//setters
+	public void setGroup(int n) {
+		groupNumber = n;
+	}
+	
 	public String toString() {
 		return name;
 	}

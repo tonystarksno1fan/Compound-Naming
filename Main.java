@@ -7,6 +7,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static final int height = 700;	//Frame dimensions
 	public static final int width = 1000; 	
 
+	public static HashMap<Integer, Group> groups = new HashMap<>();
+	Map<Integer, LinkedList<Integer>> molecule = new HashMap<>();
+	public static int groupCounter = 0;
+	public static int atomCounter = 0;
+
 	public static int mouseX;
 	public static int mouseY;
 
@@ -127,8 +132,17 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						Atom temp = placeboList.get(j);
 						if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
 							Atom temp2 = new Atom(temp.getName(), (width-240)+temp.getX(), temp.getY(), temp.getWidth(), temp.getHeight(), temp.getType());
+							groupCounter++;
+							temp2.setGroup(groupCounter);
 							atomList.add(temp2);
-							selected = temp2;
+							selected = temp2;				//this is the first group
+							groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
+							if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
+								groups.get(groupCounter).addC();
+							}
+							else if (selected.getName().equals("H")) {
+								groups.get(groupCounter).addH();
+							}
 						}
 					}
 				}
@@ -163,6 +177,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
 			if(temp != null) {		
+				//math to snap atoms into place
 				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
 				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
@@ -211,39 +226,73 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				if(!selected.matchList(temp, selected.bondedElements)) {
 					selected.bondedElements.add(temp);
 					temp.bondedElements.add(selected);
-				}
-
-				if(temp.group>=0) {
-					if(selected.group>=0 && selected.group>temp.group) {
-						int index = selected.group;
-
-						for(int i=0; i<groupList.get(index).size(); i++) {
-							groupList.get(temp.group).add(groupList.get(index).get(i));
-							groupList.get(index).get(i).group = temp.group;
+					/*
+					 * add my atoms to group here
+					 */
+					if (selected.getType().equals("atom")) {
+						int g = temp.getGroup();
+						groupCounter = g;
+						selected.setGroup(g);
+						if (selected.getName().equals("C")) {
+							groups.get(g).addC();
 						}
-
-						groupList.remove(index);
+						else {
+							groups.get(g).addH();
+						}
 					}
-
-					else if(selected.group<0) {								
-						groupList.get(temp.group).add(selected);
-						selected.group = temp.group;
-
-					}
-				}
-				else if(temp.group<0) {
-					if(selected.group>0) {
-						temp.group = selected.group;
-						groupList.get(selected.group).add(temp);
-					}
-					else {
-						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
-						selected.group = groupList.size()-1;
-						temp.group = groupList.size()-1;
+					else {		//case where it's a bond
+						/*
+						 * make a new bond class to store which group numbers it;s attached to
+						 */
 					}
 				}
+
+				/*
+				 * write new code over here 
+				 */
+				//				if(temp.group>=0) {
+				//					if(selected.group>=0 && selected.group>temp.group) {
+				//						int index = selected.group;
+				//
+				//						for(int i=0; i<groupList.get(index).size(); i++) {
+				//							groupList.get(temp.group).add(groupList.get(index).get(i));
+				//							groupList.get(index).get(i).group = temp.group;
+				//						}
+				//
+				//						groupList.remove(index);
+				//					}
+				//
+				//					else if(selected.group<0) {								
+				//						groupList.get(temp.group).add(selected);
+				//						selected.group = temp.group;
+				//
+				//					}
+				//				}
+				//				else if(temp.group<0) {
+				//					if(selected.group>0) {
+				//						temp.group = selected.group;
+				//						groupList.get(selected.group).add(temp);
+				//					}
+				//					else {
+				//						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+				//						selected.group = groupList.size()-1;
+				//						temp.group = groupList.size()-1;
+				//					}
+				//				}
 			}
-
+			/*
+			 * must remember to remove this dropped atom in the case that it gets attached to a group!
+			 */
+			else if (temp == null) {		//case where a single atom is dropped onto the screen (has not collided with others)
+				//				groupCounter++;				//this is the first group
+				//				groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
+				//				if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
+				//					groups.get(groupCounter).addC();
+				//				}
+				//				else if (selected.getName().equals("H")) {
+				//					groups.get(groupCounter).addH();
+				//				}
+			}
 			if(selected.getX() > width-240) atomList.remove(selected);
 		}
 	}
@@ -286,13 +335,13 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				}
 			});
 
-			new Nomenclature();																	//This is just copied from Tester pretty much
-			
-			Molecule.group = new HashMap<>(export);
-			Molecule.molecule = new HashMap<>(map);
-			Molecule.visited = new boolean[map.size() + 1];
+			//This is just copied from Tester pretty much
+			Molecule mol = new Molecule(map, export, "single");
+			//			Molecule.group = new HashMap<>(export);
+			//			Molecule.molecule = new HashMap<>(map);
+			//			Molecule.visited = new boolean[map.size() + 1];
 
-			String name = Molecule.name("single");
+			String name = mol.name();
 			System.out.println(name);
 		}
 
@@ -300,104 +349,17 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	}
 
 	public static void compile(Atom atom, ArrayList<Atom> bonds, ArrayList<Atom> checked) {
-		if(!atom.matchList(atom, checked)) {
-			//System.out.println("debug: first layer : " + atom.bondedElements.size() + ", " + atom.getName());
-
-			if(atom.getType().equalsIgnoreCase("bond")) {
-				//System.out.println("debug: second layer : bond");
-
-				bonds.add(atom);
-				checked.add(atom);
+		int h = 0;
+		int c = 0;
+		for (Atom a : atomList) {
+			if (a.getType().equals("H")) {
+				h++;
+			}
+			else if (a.getType().equals("C")) {
+				c++;
 			}
 			else {
-				//System.out.println("debug: second layer : Atom: " + atom.getName());
 
-				checked.add(atom);
-
-				if(atom.getName().equalsIgnoreCase("H")) {
-					hydrogenCount++;
-
-					for(int i=0; i<atom.bondedElements.size(); i++)
-						if(!atom.matchList(atom.bondedElements.get(i), checked))
-							compile(atom.bondedElements.get(i), bonds, checked);
-				}
-				else if(atom.getName().equalsIgnoreCase("C")) {						
-					carbonCount++;
-
-					for(int i=0; i<atom.bondedElements.size(); i++)
-						if(!atom.matchList(atom.bondedElements.get(i), checked))
-							compile(atom.bondedElements.get(i), bonds, checked);
-				}
-
-				for(int j=0; j<atom.bondedElements.size(); j++) {
-					if(!atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond")) 
-						compile(atom.bondedElements.get(j), bonds, checked);
-					else if(atom.matchList(atom.bondedElements.get(j), checked) && !atom.getType().equalsIgnoreCase("bond") 
-							&& j == atom.bondedElements.size()-1) 
-						compile(atom, bonds, checked);
-				}
-			}
-		}
-		else {			
-			if(atom.getType().equalsIgnoreCase("bond")) return;
-
-			//System.out.println("endgame: " + atom.getName());
-
-			for(int j=0; j<checked.size(); j++) {
-
-				if(!checked.get(j).getType().equalsIgnoreCase("bond")) {
-
-					for(int k=0; k<checked.get(j).bondedElements.size(); k++) {		
-
-						if(!atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond")) 
-							compile(checked.get(j).bondedElements.get(k), bonds, checked);
-
-						else if(atom.matchList(checked.get(j).bondedElements.get(k), checked) && !checked.get(j).getType().equalsIgnoreCase("bond") 
-								&& k == checked.get(j).bondedElements.size()-1 && atom.counted<1) {
-
-							if(hydrogenCount == 0 && carbonCount == 0) return;
-
-							//System.out.println("endgame: " + atom.getName() + ", " + k + ", " + (checked.get(j).bondedElements.size()-1));
-
-							//System.out.println((export.size()+1) + " : " + hydrogenCount + ", " + carbonCount);							
-
-							export.put(export.size()+1, new Group(hydrogenCount, carbonCount));
-							hydrogenCount = 0;
-							carbonCount = 0;
-
-							for(int m=0; m<atom.bondedElements.size(); m++)
-								if(atom.bondedElements.get(m).getType().equals("atom"))
-									atom.bondedElements.get(m).counted = export.size()+1;
-							atom.counted = export.size()+1;
-
-							for(int a=0; a<bonds.size(); a++) {
-								for(int b=0; b<bonds.get(a).bondedElements.size(); b++) {
-									if(bonds.get(a).bondedElements.get(b).counted > 0 && bonds.get(a).bondedElements.get(b).counted != atom.counted) {	
-										
-										int c = bonds.get(a).bondedElements.get(b).counted-1;
-										int v = atom.counted-1;
-
-										if(!map.containsKey(c))
-											map.put(c, new LinkedList<>());
-										map.get(c).add(v);
-
-										if(!map.containsKey(v))
-											map.put(v, new LinkedList<>());
-										map.get(v).add(c);
-									}
-								}
-							}
-
-							if(bonds.size() > 0)
-								for(int l=0; l<bonds.size(); l++)
-									for(int n=0; n<bonds.get(l).bondedElements.size(); n++)
-										if(!atom.matchList(bonds.get(l).bondedElements.get(n), checked))
-											compile(bonds.get(l).bondedElements.get(n), new ArrayList<Atom>(Arrays.asList(bonds.get(l))), checked);
-
-							return;
-						}
-					}
-				}
 			}
 		}
 	}

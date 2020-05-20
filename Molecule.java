@@ -9,6 +9,7 @@ public class Molecule {
 	int longest = 0;	//length of longest carbon chain
 	
 	public Molecule(Map<Integer, LinkedList<Integer>> map, HashMap<Integer, Group> group, String type) {
+		new Nomenclature();
 		molecule = new HashMap<>(map);
 		this.group = new HashMap<>(group);
 		bondType = type;
@@ -24,6 +25,10 @@ public class Molecule {
 				findPaths(i, i+1, 0, new int[molecule.size()], 0);	//finds every possible carbon chain path
 				longest++;
 				path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
+				for (int k = 0; k < path[i].length; k++) {
+					System.out.print(path[i][k] + " ");
+				}
+				System.out.println();
 				
 				/*
 				 * run dfs twice
