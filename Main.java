@@ -9,6 +9,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 	public static HashMap<Integer, Group> groups = new HashMap<>();
 	Map<Integer, LinkedList<Integer>> molecule = new HashMap<>();
+	public static ArrayList<Bond> bonds = new ArrayList<>();
+	public static int bondCounter = 0;
 	public static int groupCounter = 0;
 	public static int atomCounter = 0;
 
@@ -117,7 +119,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {							//Responsible for updating the location of the dragged object
 			mouseX = e.getX();												//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
-
+//			System.out.println("x: " + mouseX + " y: " + mouseY);
+			
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
 					for(int i=0; i<atomList.size(); i++) {
@@ -132,17 +135,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						Atom temp = placeboList.get(j);
 						if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
 							Atom temp2 = new Atom(temp.getName(), (width-240)+temp.getX(), temp.getY(), temp.getWidth(), temp.getHeight(), temp.getType());
-							groupCounter++;
-							temp2.setGroup(groupCounter);
-							atomList.add(temp2);
-							selected = temp2;				//this is the first group
-							groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
-							if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
-								groups.get(groupCounter).addC();
-							}
-							else if (selected.getName().equals("H")) {
-								groups.get(groupCounter).addH();
-							}
+							selected = temp2;
 						}
 					}
 				}
@@ -151,7 +144,9 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
 				else selected.updateLocation(mouseX, mouseY);
 			}
+			System.out.println(selected.getX() + ", " + selected.getY());
 		}
+		
 
 		public void mouseMoved(MouseEvent e) {}
 	};
@@ -229,9 +224,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					/*
 					 * add my atoms to group here
 					 */
-					if (selected.getType().equals("atom")) {
+					
+					//when 2 atoms collide with each other
+					if (selected.getType().equals("atom") && temp.getType().equals("atom")) {		
 						int g = temp.getGroup();
-						groupCounter = g;
+						groupCounter = groups.keySet().size();		
 						selected.setGroup(g);
 						if (selected.getName().equals("C")) {
 							groups.get(g).addC();
@@ -240,45 +237,34 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 							groups.get(g).addH();
 						}
 					}
-					else {		//case where it's a bond
-						/*
-						 * make a new bond class to store which group numbers it;s attached to
-						 */
+					//when an atom collides with a bond
+					else if (selected.getType().equals("atom") && temp.getType().equals("bond")) {
+						for (Atom a : atomList) {
+							if (temp.equals(a)) {	//if the temporary var equals a bond in the list
+								for (Bond b : bonds) {
+									if (b.equals(temp)) {
+										groupCounter++;
+										b.setGroup(groupCounter);
+										a.setGroup(groupCounter);
+									}
+								}
+							}
+						}
+					}
+					//when a bond collides with an atom -- edge case is if a bond collides with a bond, but take 
+					//care of that later
+					else {	
+						boolean exists = false;
+						for (Bond b : bonds) {
+							if (b.getG1() == temp.getGroup() || b.getG2() == temp.getGroup()) {
+								exists = true;
+							}
+						}
+						if (!exists) {		//if bond is NOT already attached to collided atom
+							bonds.add(new Bond(selected.getType(), temp.getGroup()));
+						}
 					}
 				}
-
-				/*
-				 * write new code over here 
-				 */
-				//				if(temp.group>=0) {
-				//					if(selected.group>=0 && selected.group>temp.group) {
-				//						int index = selected.group;
-				//
-				//						for(int i=0; i<groupList.get(index).size(); i++) {
-				//							groupList.get(temp.group).add(groupList.get(index).get(i));
-				//							groupList.get(index).get(i).group = temp.group;
-				//						}
-				//
-				//						groupList.remove(index);
-				//					}
-				//
-				//					else if(selected.group<0) {								
-				//						groupList.get(temp.group).add(selected);
-				//						selected.group = temp.group;
-				//
-				//					}
-				//				}
-				//				else if(temp.group<0) {
-				//					if(selected.group>0) {
-				//						temp.group = selected.group;
-				//						groupList.get(selected.group).add(temp);
-				//					}
-				//					else {
-				//						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
-				//						selected.group = groupList.size()-1;
-				//						temp.group = groupList.size()-1;
-				//					}
-				//				}
 			}
 			/*
 			 * must remember to remove this dropped atom in the case that it gets attached to a group!
@@ -292,6 +278,22 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				//				else if (selected.getName().equals("H")) {
 				//					groups.get(groupCounter).addH();
 				//				}
+
+				if (selected.getType().equals("atom") && !atomList.contains(selected)) {
+					groupCounter++;
+					selected.setGroup(groupCounter);
+//					atomList.add(selected);
+					groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
+					if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
+						groups.get(groupCounter).addC();
+					}
+					else if (selected.getName().equals("H")) {
+						groups.get(groupCounter).addH();
+					}
+				}
+//				else {		//if the bond is not attached to anything
+//					bonds.add(new Bond(selected.getType(), bondCounter));
+//				}
 			}
 			if(selected.getX() > width-240) atomList.remove(selected);
 		}

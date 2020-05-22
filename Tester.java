@@ -30,20 +30,20 @@ public class Tester {
 		}
 		
 		HashMap<Integer, Group> temp = new HashMap<>();
-		temp.put(1, new Group(3,1));
-		temp.put(2, new Group(2,1));
-		temp.put(3, new Group(3,1));
-		temp.put(4, new Group(3,1));
-		temp.put(5, new Group(2,1));
-		temp.put(6, new Group(1,1));
-		temp.put(7, new Group(2,1));
-		temp.put(8, new Group(2,1));
-		temp.put(9, new Group(2,1));
-		temp.put(10, new Group(2,1));
-		temp.put(11, new Group(3,1));
+//		temp.put(1, new Group(3,1));
+//		temp.put(2, new Group(2,1));
+//		temp.put(3, new Group(3,1));
+//		temp.put(4, new Group(3,1));
+//		temp.put(5, new Group(2,1));
+//		temp.put(6, new Group(1,1));
+//		temp.put(7, new Group(2,1));
+//		temp.put(8, new Group(2,1));
+//		temp.put(9, new Group(2,1));
+//		temp.put(10, new Group(2,1));
+//		temp.put(11, new Group(3,1));
 		
 		Molecule mol = new Molecule(map, temp, "single");
-		System.out.println(mol.name("single"));
+		System.out.println(mol.name());
 		
 //		Molecule.group = new HashMap<>(temp);
 
