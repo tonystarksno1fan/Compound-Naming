@@ -7,12 +7,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public static final int height = 700;	//Frame dimensions
 	public static final int width = 1000; 	
 
-	public static HashMap<Integer, Group> groups = new HashMap<>();
-	Map<Integer, LinkedList<Integer>> molecule = new HashMap<>();
-	public static ArrayList<Bond> bonds = new ArrayList<>();
-	public static int bondCounter = 0;
-	public static int groupCounter = 0;
-	public static int atomCounter = 0;
+	public static Molecule mol = new Molecule("single");
 
 	public static int mouseX;
 	public static int mouseY;
@@ -119,8 +114,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {							//Responsible for updating the location of the dragged object
 			mouseX = e.getX();												//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
-//			System.out.println("x: " + mouseX + " y: " + mouseY);
-			
+			//			System.out.println("x: " + mouseX + " y: " + mouseY);
+
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
 					for(int i=0; i<atomList.size(); i++) {
@@ -135,7 +130,19 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						Atom temp = placeboList.get(j);
 						if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
 							Atom temp2 = new Atom(temp.getName(), (width-240)+temp.getX(), temp.getY(), temp.getWidth(), temp.getHeight(), temp.getType());
+							atomList.add(temp2);
 							selected = temp2;
+							String type = temp2.getType();
+							if (type.equals("atom")) {
+								selected.setGroup(mol.groups.size()+1);		//assigns the atom a group
+								mol.atoms.add(selected);				//adds it to the arraylist of atoms in molecule class
+								mol.groups.add(new Group(selected));	//adding an empty group to the group hashmap
+							}
+							else if (type.equals("bond")) {
+								selected.bondNumber = mol.bonds.size()+1;
+								mol.bonds.add(new Bond(temp2.getName(), mol.bonds.size()+1));
+							}
+							//remember to delete the above if user right clicks or releases out of bounds
 						}
 					}
 				}
@@ -144,9 +151,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				if(((JPanel)e.getSource()).getName().equals("controls")) selected.updateLocation(mouseX+width-240, mouseY);
 				else selected.updateLocation(mouseX, mouseY);
 			}
-			System.out.println(selected.getX() + ", " + selected.getY());
 		}
-		
+
 
 		public void mouseMoved(MouseEvent e) {}
 	};
@@ -218,84 +224,77 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
 				}
 
+				//if selected component collides with another component on the screen 
 				if(!selected.matchList(temp, selected.bondedElements)) {
 					selected.bondedElements.add(temp);
 					temp.bondedElements.add(selected);
 					/*
 					 * add my atoms to group here
 					 */
-					
+
 					//when 2 atoms collide with each other
-					if (selected.getType().equals("atom") && temp.getType().equals("atom")) {		
-						int g = temp.getGroup();
-						groupCounter = groups.keySet().size();		
+					if (selected.getType().equals("atom") && temp.getType().equals("atom")) {
+						int g = temp.getGroup();		
+						mol.groups.remove(selected.groupNumber-1);
 						selected.setGroup(g);
-						if (selected.getName().equals("C")) {
-							groups.get(g).addC();
-						}
-						else {
-							groups.get(g).addH();
-						}
+						mol.groups.get(g-1).addAtom(selected);
 					}
 					//when an atom collides with a bond
 					else if (selected.getType().equals("atom") && temp.getType().equals("bond")) {
-						for (Atom a : atomList) {
-							if (temp.equals(a)) {	//if the temporary var equals a bond in the list
-								for (Bond b : bonds) {
-									if (b.equals(temp)) {
-										groupCounter++;
-										b.setGroup(groupCounter);
-										a.setGroup(groupCounter);
-									}
-								}
-							}
+						if (temp.bondNumber != 0) {
+							Bond b = mol.bonds.get(temp.bondNumber-1);
+							b.setGroup(selected.groupNumber);
 						}
 					}
 					//when a bond collides with an atom -- edge case is if a bond collides with a bond, but take 
 					//care of that later
-					else {	
-						boolean exists = false;
-						for (Bond b : bonds) {
-							if (b.getG1() == temp.getGroup() || b.getG2() == temp.getGroup()) {
-								exists = true;
-							}
+					else if (selected.getType().equals("bond") && temp.getType().equals("atom")) {
+						mol.bonds.get(selected.bondNumber-1).setGroup(temp.groupNumber);
+					}
+				}
+				if(temp.group>=0) {
+					if(selected.group>=0 && selected.group>temp.group) {
+						int index = selected.group;
+
+						for(int i=0; i<groupList.get(index).size(); i++) {
+							groupList.get(temp.group).add(groupList.get(index).get(i));
+							groupList.get(index).get(i).group = temp.group;
 						}
-						if (!exists) {		//if bond is NOT already attached to collided atom
-							bonds.add(new Bond(selected.getType(), temp.getGroup()));
-						}
+
+						groupList.remove(index);
+					}
+
+					else if(selected.group<0) {								
+						groupList.get(temp.group).add(selected);
+						selected.group = temp.group;
+
+					}
+				}
+				else if(temp.group<0) {
+					if(selected.group>0) {
+						temp.group = selected.group;
+						groupList.get(selected.group).add(temp);
+					}
+					else {
+						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+						selected.group = groupList.size()-1;
+						temp.group = groupList.size()-1;
 					}
 				}
 			}
 			/*
 			 * must remember to remove this dropped atom in the case that it gets attached to a group!
 			 */
-			else if (temp == null) {		//case where a single atom is dropped onto the screen (has not collided with others)
-				//				groupCounter++;				//this is the first group
-				//				groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
-				//				if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
-				//					groups.get(groupCounter).addC();
-				//				}
-				//				else if (selected.getName().equals("H")) {
-				//					groups.get(groupCounter).addH();
-				//				}
 
-				if (selected.getType().equals("atom") && !atomList.contains(selected)) {
-					groupCounter++;
-					selected.setGroup(groupCounter);
-//					atomList.add(selected);
-					groups.put(groupCounter, new Group());	//adding an empty group to the group hashmap
-					if (selected.getName().equals("C")) {	//adjusting number of atoms in the group
-						groups.get(groupCounter).addC();
-					}
-					else if (selected.getName().equals("H")) {
-						groups.get(groupCounter).addH();
-					}
+			if(selected.getX() > width-240) {
+				atomList.remove(selected);
+				if (selected.getType().equals("atom")) {
+					mol.groups.remove(selected.groupNumber);
 				}
-//				else {		//if the bond is not attached to anything
-//					bonds.add(new Bond(selected.getType(), bondCounter));
-//				}
+				else if (selected.getType().equals("bond")) {
+					mol.bonds.remove(selected.bondNumber);
+				}
 			}
-			if(selected.getX() > width-240) atomList.remove(selected);
 		}
 	}
 
@@ -303,67 +302,18 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 	public void mouseExited(MouseEvent e) {}
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("compile")) {				
-			if(selected == null || selected.group < 0 || selected.getType().equalsIgnoreCase("bond")) {
-				JOptionPane.showMessageDialog(null, "Please select an Atom within a group first");
-				return;
-			}
-
-			export.clear();													//Reset export hashmap
-
-			for(int i=0; i<atomList.size(); i++)							//Reset previous compile markers
-				atomList.get(i).counted = 0;
-
-			for(Atom temp : groupList.get(selected.group))					//Switch to rightmost atom of the selected group
-				if(temp.getX() < selected.getX())
-					selected = temp;
-
-			compile(selected, new ArrayList<Atom>(), new ArrayList<Atom>());
-
-			//System.out.println(export.size() + "\n");
-
-			//System.out.println(map.size());
-
-			export.entrySet().forEach(entry->{													//Prints Group class with the number of hydrogens and carbons
-				System.out.println(entry.getKey() + " : " + entry.getValue().getNums());  		//export is the temp HashMap from Tester
-			});																					//map is map
-			System.out.println();
-
-			map.entrySet().forEach(aa->{														//Prints which nodes are connected to each other
-				int num = aa.getKey();
-				LinkedList<Integer> temp = aa.getValue();
-				for(int m=0; m<temp.size(); m++) {
-					System.out.println(num + " : " + temp.get(m));
-				}
-			});
-
-			//This is just copied from Tester pretty much
-			Molecule mol = new Molecule(map, export, "single");
-			//			Molecule.group = new HashMap<>(export);
-			//			Molecule.molecule = new HashMap<>(map);
-			//			Molecule.visited = new boolean[map.size() + 1];
-
-			String name = mol.name();
-			System.out.println(name);
+		if(e.getActionCommand().equals("compile")) {	
+			System.out.println("atoms: " + mol.atoms.size() + " bonds: " + mol.bonds.size() + " groups: " 
+					+ mol.groups.size());
+			mol.assemble();											//fix assemble function
+//			Set<Integer> molecule = mol.molecule.keySet();
+//			for (Integer i : molecule) {
+//				System.out.println(mol.molecule.get(i));
+//			}
+			System.out.println(mol.name());
 		}
 
 		frame.requestFocus();
-	}
-
-	public static void compile(Atom atom, ArrayList<Atom> bonds, ArrayList<Atom> checked) {
-		int h = 0;
-		int c = 0;
-		for (Atom a : atomList) {
-			if (a.getType().equals("H")) {
-				h++;
-			}
-			else if (a.getType().equals("C")) {
-				c++;
-			}
-			else {
-
-			}
-		}
 	}
 
 	public static class Canvas extends JPanel {		//Responsible for drawing onto the main screen (the portion that does not contain the controls)

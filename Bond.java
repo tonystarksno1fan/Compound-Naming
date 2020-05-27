@@ -5,6 +5,10 @@ public class Bond {
 	private String type;
 	private int bondNum;
 
+	public Bond(String t) {
+		type = t;
+	}
+	
 	public Bond(String t, int bn) {
 		type = t;
 		bondNum = bn;
@@ -16,9 +20,8 @@ public class Bond {
 		this.g2 = g2;
 	}
 	
-	public boolean equals(Object o) {
-		Atom a = (Atom) o;
-		return (a.getGroup() == g1 || a.getGroup() == g2);
+	public boolean equals(Bond a) {
+		return (a.g1 == g1 && a.g2 == g2 && a.bondNum == bondNum);
 	}
 
 	//getters

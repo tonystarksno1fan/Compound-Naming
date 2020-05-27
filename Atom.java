@@ -24,12 +24,13 @@ public class Atom extends JPanel {
 	public int group = -1;
 	
 	public int groupNumber;
+	public int bondNumber = 0;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {
 		this.name = name;
-
+		groupNumber = 0;
 		this.type = type;
-
+		
 		this.objectW = width;
 		this.objectH = height;
 

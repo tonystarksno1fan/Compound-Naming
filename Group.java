@@ -24,8 +24,13 @@ public class Group {
 		c = numCarbons;
 	}
 	
-	public Group() {
-		
+	public Group(Atom a) {
+		if (a.getName().equals("C")) {
+			c++;
+		}
+		else if (a.getName().equals("H")) {
+			h++;
+		}
 	}
 	
 	//constructor for bonds
@@ -42,25 +47,18 @@ public class Group {
 		return Nomenclature.oPrefixes.get(c)+"yl";
 	}
 	
-	//setters
-	public void addC() {
-		c++;
-	}
-	
-	public void addC(int n) {
-		c += n;
-	}
-	
-	public void addH() {
-		h++;
-	}
-	
-	public void addH(int n) {
-		h += n;
-	}
-	
+	//setters	
 	public void setName() {
 		name = Nomenclature.oPrefixes.get(c)+"yl";
+	}
+	
+	public void addAtom(Atom a) {
+		if (a.getName().equals("C")) {
+			c++;
+		}
+		else if (a.getName().equals("H")) {
+			h++;
+		}
 	}
 	
 	public String toString() {
