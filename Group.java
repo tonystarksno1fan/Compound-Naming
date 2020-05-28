@@ -15,7 +15,10 @@ public class Group {
 	
 	//constructor for molecules you get from GUI
 	public Group (int numHydrogen, int numCarbons, int number) {
-		name = Nomenclature.oPrefixes.get(numCarbons)+"yl";
+		if (numCarbons >= 1)
+			name = Nomenclature.oPrefixes.get(numCarbons)+"yl";
+		else
+			name = "";
 		elements.put("hydrogen", numHydrogen);
 		elements.put("carbon", numCarbons);
 		this.number = number;
@@ -62,6 +65,6 @@ public class Group {
 	}
 	
 	public String toString() {
-		return name;
+		return ("C" + c + "H" + h);
 	}
 }
