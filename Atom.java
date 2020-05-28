@@ -18,7 +18,7 @@ public class Atom extends JPanel {
 	private int dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private int dy;
 
-	public ArrayList<Atom> bondedElements = new ArrayList<Atom>();
+	public Atom[] bondedElements = new Atom[] {null, null, null, null};
 	public int counted = 1;
 
 	public int group = -1;
@@ -97,17 +97,25 @@ public class Atom extends JPanel {
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
+				
+				int tempX = temp.lastX;
+				int tempY = temp.lastY;
+				
+				if(temp.angle != 0 && temp.angle != Math.PI) {
+					tempX = tempX+objectW/2-objectH/2;
+					tempY = tempY+objectH/2-objectW/2;
+				}
 
 				if(temp.group < 0 || temp.group != group) {
-					if(		(lastY <= temp.lastY+temp.objectH && lastY >= temp.lastY) || 
-							(lastY+objectH <= temp.lastY+temp.objectH && lastY+objectH >= temp.lastY) ||
-							(lastY >= temp.lastY && lastY+objectH <= temp.lastY+temp.objectH) ||
-							(lastY <= temp.lastY && lastX+objectH >= temp.lastY+temp.objectH) ||
-							(angle!=0 && angle!=Math.PI && lastY+objectW <= temp.lastY+temp.objectH && lastY+objectW >= temp.lastY)) {
+					if(		(lastY <= tempY+temp.objectH && lastY >= tempY) || 
+							(lastY+objectH <= tempY+temp.objectH && lastY+objectH >= tempY) ||
+							(lastY >= tempY && lastY+objectH <= tempY+temp.objectH) ||
+							(lastY <= tempY && lastX+objectH >= tempY+temp.objectH) ||
+							(angle!=0 && angle!=Math.PI && lastY+objectH <= tempY+temp.objectH && lastY+objectW >= tempY)) {
 
-						if(		(lastX>=temp.lastX && lastX<=temp.lastX+temp.objectW) || 
-								(lastX+objectW >= temp.lastX && lastX+objectW <= temp.lastX+temp.objectW)) {
-							//System.out.println("collision");
+						if(		(lastX>=tempX && lastX<=tempX+temp.objectW) || 
+								(lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
+							System.out.println(type + ", " + temp.type);
 
 							return temp;
 						}

@@ -166,6 +166,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				Atom temp = atomList.get(i);
 				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
 					selected = temp;
+					System.out.println(selected.group);
 				}
 			}
 			if(selected == original) selected = null;
@@ -177,63 +178,114 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
-			if(temp != null) {		
-				//math to snap atoms into place
-				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Component is on the right
+			boolean connect = true;
+
+			if(temp != null && ((selected.getType().equals("bond") ^ temp.getType().equals("bond")) || 					//math to snap atoms into place
+					(!selected.getType().equals("bond") && !temp.getType().equals("bond")))) {							//bonds can't attach to bonds
+
+				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Selected is on the right
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-				(selected.angle == Math.PI || selected.angle == 0)) 										
+				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) 
+				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[1] == null 
+				&& selected.bondedElements[3] == null) {										
+
+					temp.bondedElements[1] = selected;
+					selected.bondedElements[3] = temp;
 
 					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+				}
 
-				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Component is on the left
+				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Selected is on the left
 						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) && 
-				(selected.angle == Math.PI || selected.angle == 0))
+				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2))  
+				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[3] == null 
+				&& selected.bondedElements[1] == null) {
+
+					temp.bondedElements[3] = selected;
+					selected.bondedElements[1] = temp;
 
 					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+				}
 
-				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Above
-						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2)
+				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is below
+						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2
+						&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {
+
+					temp.bondedElements[2] = selected;
+					selected.bondedElements[0] = temp;
 
 					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
+				}
 
-				else if(temp.getType().equalsIgnoreCase("atom") && selected.getType().equalsIgnoreCase("atom")		//Below
-						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is above
+						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2
+						&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
+
+					System.out.println("sdfsdf");
+					
+					temp.bondedElements[0] = selected;
+					selected.bondedElements[2] = temp;
 
 					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
+				}
 
-				if(!selected.getType().equalsIgnoreCase("atom")) {		//Only apply these transformations for bonds
-					if(selected.getY() >= temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is below target					
+				else connect = false;
+
+				//System.out.println(selected.getY()+selected.getHeight()/2 + ", " + (temp.getY()+temp.getHeight()/2) + ", " + temp.angle);
+				System.out.println(selected.getY() + ", " + temp.getY());
+
+				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
+					if(selected.getY() >= temp.getY()+temp.getHeight()/2 
+							&& selected.angle != 0 && selected.angle != Math.PI
+							&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {	//Rotated component is below target		
+
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
 
+						temp.bondedElements[2] = selected;
+						selected.bondedElements[0] = temp;
+
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
-					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI) {	//Rotated component is above target					
+					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI
+							&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {	//Rotated component is above target		
+
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+
+						temp.bondedElements[0] = selected;
+						selected.bondedElements[2] = temp;
 
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
 				} 
-				else if(selected.getType().equalsIgnoreCase("atom") && !temp.getType().equalsIgnoreCase("atom") && temp.angle != 0 && temp.angle != Math.PI) {
-					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2)
+
+				else if(selected.getType().equals("atom") && temp.getType().equals("bond") && temp.angle != 0 && temp.angle != Math.PI) {					
+					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2 && 
+							temp.bondedElements[0] == null && selected.bondedElements[2] == null) {									//Atom above bond
+
+						temp.bondedElements[2] = selected;
+						selected.bondedElements[0] = temp;
+
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
-					else 
+					}
+					else if(temp.bondedElements[2] == null && selected.bondedElements[0] == null) {									//Atom below bond
+
+						temp.bondedElements[2] = selected;
+						selected.bondedElements[0] = temp;
+
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
+					}
 				}
 
 				//if selected component collides with another component on the screen 
-				if(!selected.matchList(temp, selected.bondedElements)) {
-					selected.bondedElements.add(temp);
-					temp.bondedElements.add(selected);
+				if(connect) {
 					/*
 					 * add my atoms to group here
 					 */
 
 					//when 2 atoms collide with each other
-					if (selected.getType().equals("atom") && temp.getType().equals("atom")) {
+					if(selected.getType().equals("atom") && temp.getType().equals("atom")) {
 						int g = temp.getGroup();		
 						mol.groups.remove(selected.groupNumber-1);
 						selected.setGroup(g);
@@ -251,48 +303,51 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					else if (selected.getType().equals("bond") && temp.getType().equals("atom")) {
 						mol.bonds.get(selected.bondNumber-1).setGroup(temp.groupNumber);
 					}
-				}
-				if(temp.group>=0) {
-					if(selected.group>=0 && selected.group>temp.group) {
-						int index = selected.group;
 
-						for(int i=0; i<groupList.get(index).size(); i++) {
-							groupList.get(temp.group).add(groupList.get(index).get(i));
-							groupList.get(index).get(i).group = temp.group;
+					if(temp.group>=0) {
+						if(selected.group>=0 && selected.group>temp.group) {
+							int index = selected.group;
+
+							for(int i=0; i<groupList.get(index).size(); i++) {
+								groupList.get(temp.group).add(groupList.get(index).get(i));
+								groupList.get(index).get(i).group = temp.group;
+							}
+
+							groupList.remove(index);
 						}
 
-						groupList.remove(index);
+						else if(selected.group<0) {								
+							groupList.get(temp.group).add(selected);
+							selected.group = temp.group;
+						}
 					}
-
-					else if(selected.group<0) {								
-						groupList.get(temp.group).add(selected);
-						selected.group = temp.group;
-
-					}
-				}
-				else if(temp.group<0) {
-					if(selected.group>0) {
-						temp.group = selected.group;
-						groupList.get(selected.group).add(temp);
-					}
-					else {
-						groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
-						selected.group = groupList.size()-1;
-						temp.group = groupList.size()-1;
+					else if(temp.group<0) {
+						if(selected.group>=0) {
+							temp.group = selected.group;
+							groupList.get(selected.group).add(temp);
+						}
+						else {
+							groupList.add(new ArrayList<Atom>(Arrays.asList(selected, temp)));
+							selected.group = groupList.size()-1;
+							temp.group = groupList.size()-1;
+						}
 					}
 				}
-			}
-			/*
-			 * must remember to remove this dropped atom in the case that it gets attached to a group!
-			 */
+				/*
+				 * must remember to remove this dropped atom in the case that it gets attached to a group!
+				 */
 
-			if(selected.getX() > width-240) {
-				atomList.remove(selected);
-				if (selected.getType().equals("atom")) {
-					mol.groups.remove(selected.groupNumber);
-				}
-				else if (selected.getType().equals("bond")) {
-					mol.bonds.remove(selected.bondNumber);
+				for(Atom dropTest : atomList) {
+					if(dropTest.getX() > width-240) {
+						atomList.remove(dropTest);
+						if(dropTest.getType().equals("atom")) {
+							mol.groups.remove(dropTest.groupNumber);
+						}
+						else if(dropTest.getType().equals("bond")) {
+							mol.bonds.remove(dropTest.bondNumber);
+						}
+						dropTest = null;
+					}
 				}
 			}
 		}
@@ -306,10 +361,10 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 			System.out.println("atoms: " + mol.atoms.size() + " bonds: " + mol.bonds.size() + " groups: " 
 					+ mol.groups.size());
 			mol.assemble();											//fix assemble function
-//			Set<Integer> molecule = mol.molecule.keySet();
-//			for (Integer i : molecule) {
-//				System.out.println(mol.molecule.get(i));
-//			}
+			//			Set<Integer> molecule = mol.molecule.keySet();
+			//			for (Integer i : molecule) {
+			//				System.out.println(mol.molecule.get(i));
+			//			}
 			System.out.println(mol.name());
 		}
 
