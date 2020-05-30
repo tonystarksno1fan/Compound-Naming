@@ -1,4 +1,3 @@
-
 public class Bond {
 	private int g1;
 	private int g2;

@@ -37,6 +37,8 @@ public class Molecule {
 //				else if (longest == 1) {
 //					path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
 //				}
+				longest++;
+				path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
 				/*
 				 * run dfs twice
 				 * create an arraylist of the farthest groups
@@ -52,6 +54,7 @@ public class Molecule {
 //				}
 //				System.out.println();
 //			}
+			System.out.println("longest paths: " + paths.size());
 			if (paths.size() > 1) {
 				int i = lowestNumerals(paths);
 				out += findBranches(i);
@@ -246,6 +249,17 @@ public class Molecule {
 				else {
 					findPaths(i, n, counter, arr, arrCounter+1);	//traverse down the tree
 				}
+				arr[arrCounter] = s;
+				//				for (int p : arr) {
+				//					System.out.print(p + " ");
+				//				}
+				//				System.out.println();
+				//				if (!group.get(v).equals("carbon")) { 		<= deal with this later w/ input groups
+				//					findLongest(v, counter);
+				//				}
+				//				else {
+				findPaths(i, n, counter+1, arr, arrCounter+1);
+				//				}
 			}
 		}
 	}

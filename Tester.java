@@ -30,17 +30,17 @@ public class Tester {
 		}
 		
 		HashMap<Integer, Group> temp = new HashMap<>();
-//		temp.put(1, new Group(3,1));
-//		temp.put(2, new Group(2,1));
-//		temp.put(3, new Group(3,1));
-//		temp.put(4, new Group(3,1));
-//		temp.put(5, new Group(2,1));
-//		temp.put(6, new Group(1,1));
-//		temp.put(7, new Group(2,1));
-//		temp.put(8, new Group(2,1));
-//		temp.put(9, new Group(2,1));
-//		temp.put(10, new Group(2,1));
-//		temp.put(11, new Group(3,1));
+		temp.put(1, new Group(3,1));
+		temp.put(2, new Group(2,1));
+		temp.put(3, new Group(3,1));
+		temp.put(4, new Group(3,1));
+		temp.put(5, new Group(2,1));
+		temp.put(6, new Group(1,1));
+		temp.put(7, new Group(2,1));
+		temp.put(8, new Group(2,1));
+		temp.put(9, new Group(2,1));
+		temp.put(10, new Group(2,1));
+		temp.put(11, new Group(3,1));
 		
 		Molecule mol = new Molecule(map, temp, "single");
 		System.out.println(mol.name());
@@ -50,7 +50,7 @@ public class Tester {
 //		Molecule.molecule = new HashMap<>(map);
 //		Molecule.visited = new boolean[map.size() + 1];
 //		Molecule.path = new int[map.size()][map.size()];
-////		Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
+//			Molecule.findLongest(1, 0, new int[map.size() + 1], 0);
 //		
 //		String name = Molecule.name("single");
 //		for (int i : Molecule.path) {
@@ -71,7 +71,6 @@ public class Tester {
 4 5
 5 6
 6 7
-
 second test set
 1 2
 2 3
