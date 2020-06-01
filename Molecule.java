@@ -7,6 +7,7 @@ public class Molecule {
 	String bondType = "single";
 	int[][] path; //an array of all possible paths
 	int longest = 0;	//length of longest carbon chain
+	ArrayList<Integer> outer; //outer edges of the graph/molecule
 	ArrayList<Atom> atoms;
 	ArrayList<Group> groups;
 	ArrayList<Bond> bonds;
@@ -19,42 +20,43 @@ public class Molecule {
 		bonds = new ArrayList<>();
 		bondType = type;
 		groups = new ArrayList<>();
+		outer = new ArrayList<>();
 	}
 
 	//call on this method for final name of molecule
 	public String name() {
 		String out = "";
-		path = new int[molecule.size()][molecule.size()];
+		path = new int[2][molecule.size()];
 		if (bondType.equals("single")) {
-			for (int i = 0; i < molecule.size(); i++) {
+			visited = new boolean[molecule.size() + 1];		//finds group farthest from starting point
+			findLongest(1, 0, false);
+			longest = 0;
+			
+			visited = new boolean[molecule.size() + 1];		//finds group farthest from above (other end of the molecule)
+			findLongest(1, 0, false);
+			visited = new boolean[molecule.size()+1];		//finds all farthest groups
+			findLongest(1, 0, true);
+			path = new int[outer.size()][molecule.size()+1];
+			longest = 0;
+			System.out.println("outer: " + outer.size());
+			
+			for (int i = 0; i < outer.size(); i++) {
 				visited = new boolean[molecule.size() + 1];
-				findPaths(i, i+1, 0, new int[molecule.size()], 0);	//finds every possible carbon chain path
-				System.out.println("starting: " + groups.get(i));
+				findPaths(i, outer.get(i), 0, new int[molecule.size()], 0);
 				if (longest > 1) {
 					path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
-					System.out.println(path[i][0] + " " + path[i][1]);
 				}
-//				else if (longest == 1) {
-//					path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
-//				}
-				longest++;
-				path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
-				/*
-				 * run dfs twice
-				 * create an arraylist of the farthest groups
-				 */
-
 				longest = 0;
 			}
+			
 			ArrayList<Integer> paths = longestPath(path);		//narrows it down to only the longest paths
-//			System.out.println("PRINTING....");
-//			for (int i = 0; i < path.length; i++) {
-//				for (int k = 0; k < path[0].length; k++) {
-//					System.out.print(path[i][k] + " ");
-//				}
-//				System.out.println();
-//			}
 			System.out.println("longest paths: " + paths.size());
+			for (int i = 0; i < path.length; i++) {
+				for (int k = 0; k < path[0].length; k++) {
+					System.out.print(path[i][k] + " ");
+				}
+				System.out.println();
+			}
 			if (paths.size() > 1) {
 				int i = lowestNumerals(paths);
 				out += findBranches(i);
@@ -62,7 +64,6 @@ public class Molecule {
 			else {
 				out += findBranches(paths.get(0));
 			}
-			System.out.println("naming: " + longest);
 			out += Nomenclature.oPrefixes.get(longest);
 			out += "ane";
 		}
@@ -107,7 +108,7 @@ public class Molecule {
 					}
 				}
 				if (!contains && groups.get(path[n][i] - 1).c > 0) {	//where i = current alkyl group and k is its branch
-//					System.out.println("not contains: " + path[n][i]);s
+					//					System.out.println("not contains: " + path[n][i]);s
 					map.put(i+1, getGroupName(i,k)); //only takes into account case where there's 1 alkyl branch
 				}
 				else if (contains) {
@@ -211,7 +212,6 @@ public class Molecule {
 		for (Bond b : bonds) {
 			int x = b.getG1();
 			int y = b.getG2();
-			System.out.println("x: " + x + " y: " + y);
 			if (!molecule.containsKey(x)) {
 				LinkedList<Integer> temp = new LinkedList<>();
 				molecule.put(x, temp);
@@ -225,9 +225,34 @@ public class Molecule {
 		}
 	}
 
+	public void findLongest(int s, int counter, boolean storingOuter) {
+		if (groups.get(s-1).c > 0) { 		
+			counter++;
+		}
+		visited[s] = true;
+		if (storingOuter && counter == longest) {
+			outer.add(s);
+		}
+		else {
+			if (counter > longest) {
+				longest = counter;
+			}
+		}
+		if (molecule.get(s) == null) {
+			// base case where u does not have any kids
+			return;
+		}
+		for (int n : molecule.get(s)) {		//for every group the current group is connected to
+			if (!visited[n]) {				//if that group (node) hasn't been visited
+				visited[n] = true;
+				findLongest(n, counter, storingOuter);
+			}
+		}
+	}
+
 	//where s is the start node, counter is the longest chain, arr is path, arrcounter tracks path
 	public void findPaths(int i, int s, int counter, int[] arr, int arrCounter) {
-		if (groups.get(s-1).c > 0) { 		//<= deal with this later w/ input groups
+		if (groups.get(s-1).c > 0) {
 			counter++;
 		}
 		visited[s] = true;
@@ -243,23 +268,7 @@ public class Molecule {
 			if (!visited[n]) {				//if that group (node) hasn't been visited
 				visited[n] = true;
 				arr[arrCounter] = s;		//keeps track of the path
-				if (groups.get(n-1).c == 0) { 		
-					findPaths(i, n, counter, arr, arrCounter);
-				}
-				else {
-					findPaths(i, n, counter, arr, arrCounter+1);	//traverse down the tree
-				}
-				arr[arrCounter] = s;
-				//				for (int p : arr) {
-				//					System.out.print(p + " ");
-				//				}
-				//				System.out.println();
-				//				if (!group.get(v).equals("carbon")) { 		<= deal with this later w/ input groups
-				//					findLongest(v, counter);
-				//				}
-				//				else {
-				findPaths(i, n, counter+1, arr, arrCounter+1);
-				//				}
+				findPaths(i, n, counter, arr, arrCounter+1);
 			}
 		}
 	}

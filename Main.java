@@ -166,7 +166,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				Atom temp = atomList.get(i);
 				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
 					selected = temp;
-					System.out.println(selected.group);
 				}
 			}
 			if(selected == original) selected = null;
@@ -220,8 +219,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is above
 						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2
 						&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
-
-					System.out.println("sdfsdf");
 					
 					temp.bondedElements[0] = selected;
 					selected.bondedElements[2] = temp;
@@ -232,7 +229,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				else connect = false;
 
 				//System.out.println(selected.getY()+selected.getHeight()/2 + ", " + (temp.getY()+temp.getHeight()/2) + ", " + temp.angle);
-				System.out.println(selected.getY() + ", " + temp.getY());
 
 				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
 					if(selected.getY() >= temp.getY()+temp.getHeight()/2 

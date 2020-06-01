@@ -115,7 +115,6 @@ public class Atom extends JPanel {
 
 						if(		(lastX>=tempX && lastX<=tempX+temp.objectW) || 
 								(lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
-							System.out.println(type + ", " + temp.type);
 
 							return temp;
 						}
