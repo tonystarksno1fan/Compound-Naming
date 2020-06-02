@@ -84,11 +84,6 @@ public class Atom extends JPanel {
 		dy = 0;
 
 		gg.dispose();
-		
-		if(Main.atomList.size() > 0)
-			System.out.println(Main.atomList.size() + ", " + Main.atomList.get(0));
-		else 
-			System.out.println(Main.atomList.size());
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {		//Goes through atomList in Main to check for a collision between Atom objects and the given X and Y 
@@ -120,16 +115,6 @@ public class Atom extends JPanel {
 
 						if(		(lastX>=tempX && lastX<=tempX+temp.objectW) || 
 								(lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
-							
-							/*System.out.println("\n----------------\nUp: " + bondedElements[0]);
-							System.out.println("Right: " + bondedElements[1]);
-							System.out.println("Down: " + bondedElements[2]);
-							System.out.println("Left: " + bondedElements[3] + "\n");
-							
-							System.out.println("Up: " + temp.bondedElements[0]);
-							System.out.println("Right: " + temp.bondedElements[1]);
-							System.out.println("Down: " + temp.bondedElements[2]);
-							System.out.println("Left: " + temp.bondedElements[3] + "\n");*/
 							
 							return temp;
 						}
