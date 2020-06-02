@@ -81,6 +81,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		placeboList.add(new Atom("H", 90, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 30, 10, "bond"));
 		placeboList.add(new Atom("Double Bond", 120, 20, 30, 10, "bond"));
+		placeboList.add(new Atom("Triple Bond", 20, 50, 30, 10, "bond"));
 
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
@@ -114,7 +115,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {							//Responsible for updating the location of the dragged object
 			mouseX = e.getX();												//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
-			//			System.out.println("x: " + mouseX + " y: " + mouseY);
 
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
@@ -164,14 +164,15 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(((JPanel)e.getSource()).getName().equals("panel")) {
 			for(int i=0; i<atomList.size(); i++) {
 				Atom temp = atomList.get(i);
-				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
+				
+				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) 
 					selected = temp;
-					//System.out.println(selected.group);
-				}
 			}
 			if(selected == original) selected = null;
 		}
 		else selected = null;
+		
+		System.out.println(selected.groupNumber);
 	}
 
 	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
@@ -231,9 +232,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				}
 
 				else if(selected.getType().equals("atom") && temp.getType().equals("atom")) connect = false;
-
-				//System.out.println(selected.getY()+selected.getHeight()/2 + ", " + (temp.getY()+temp.getHeight()/2) + ", " + temp.angle);
-				//System.out.println(selected.getY() + ", " + temp.getY());
 
 				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
 					if(selected.getY() >= temp.getY()+temp.getHeight()/2 
@@ -343,37 +341,40 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				/*
 				 * must remember to remove this dropped atom in the case that it gets attached to a group!
 				 */
+			}
+		}
 
-				Iterator<Atom> iter = atomList.iterator();
-				while(iter.hasNext()) {
-					Atom dropTest = iter.next();
+		Iterator<Atom> iter = atomList.iterator();												//Iterate through atomList to check if any should be removed
 
-					if(dropTest.getX() > width-240) {
-						groupList.get(dropTest.group).remove(dropTest);
+		while(iter.hasNext()) {
+			Atom dropTest = iter.next();
 
-						if(dropTest.bondedElements[0] != null)
-							dropTest.bondedElements[0].bondedElements[2] = null;
-						
-						if(dropTest.bondedElements[1] != null)
-							dropTest.bondedElements[1].bondedElements[3] = null;
-						
-						if(dropTest.bondedElements[2] != null)
-							dropTest.bondedElements[2].bondedElements[0] = null;
-						
-						if(dropTest.bondedElements[3] != null)
-							dropTest.bondedElements[3].bondedElements[1] = null;
+			if(dropTest.getX() > width-240) {	
 
-						iter.remove();
+				System.out.println(dropTest);
 
-						if(dropTest.getType().equals("atom")) 
-							mol.groups.remove(dropTest.groupNumber);
+				if(dropTest.getType().equals("atom")) 
+					mol.groups.remove(dropTest.groupNumber);
 
-						else if(dropTest.getType().equals("bond")) 
-							mol.bonds.remove(dropTest.bondNumber);
+				else if(dropTest.getType().equals("bond")) 
+					mol.bonds.remove(dropTest.bondNumber);
+				
+				if(dropTest.group >= 0)
+					groupList.get(dropTest.group).remove(dropTest);
 
-						dropTest = null;
-					}
-				}
+				if(dropTest.bondedElements[0] != null)
+					dropTest.bondedElements[0].bondedElements[2] = null;
+
+				if(dropTest.bondedElements[1] != null)
+					dropTest.bondedElements[1].bondedElements[3] = null;
+
+				if(dropTest.bondedElements[2] != null)
+					dropTest.bondedElements[2].bondedElements[0] = null;
+
+				if(dropTest.bondedElements[3] != null)
+					dropTest.bondedElements[3].bondedElements[1] = null;
+
+				iter.remove();
 			}
 		}
 	}
