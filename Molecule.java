@@ -48,7 +48,16 @@ public class Molecule {
 				visited = new boolean[molecule.size() + 1];
 				findPaths(i, outer.get(i), 0, new int[molecule.size()], 0);
 				if (longest > 1) {
-					path[i][longest-1] = molecule.get(path[i][longest-2]).getLast();
+					System.out.println("starting index: " + path[i][longest-2]);
+					System.out.println("size: " + molecule.get(path[i][longest-2]).size());
+					for (Integer k : molecule.get(path[i][longest-2])) {
+						System.out.println(k + " ");
+						if (k != path[i][longest-3]) {
+							System.out.println("NOT EQUAL");
+							path[i][longest-1] = k;
+							break;
+						}
+					}
 				}
 				longest = 0;
 			}
@@ -75,8 +84,11 @@ public class Molecule {
 			ArrayList<Integer> doubles = findBonds(bonds, bondType);
 			counter = molecule.size();
 			//recursively get edge?
-			int edge = getEdge(doubles, 0);
-			System.out.println("edge: " + edge);
+			for (Integer i : doubles) {
+				counter = getEdge(i, 0, counter);
+			}
+			
+//			System.out.println("edge: " + edge);
 		}
 		else if (bondType.equals("triple")) {
 			
@@ -84,17 +96,13 @@ public class Molecule {
 		return out;
 	}
 	
-	public int getEdge (ArrayList<Integer> arr, int c) {
-		int out = arr.get(0);
-		for (Integer i : arr) {
-			visited = new boolean[molecule.size() + 1];	
-			c = shortestPath(0, counter, i);
-			if (c < counter) {
-				counter = c;
-				out = i;
-			}
+	public int getEdge (int index, int c, int shortest) {
+		visited = new boolean[molecule.size() + 1];	
+		c = shortestPath(0, counter, index);
+		if (c < shortest) {
+			return c;
 		}
-		return out;
+		return shortest;
 	}
 	
 	public int shortestPath(int counter, int shortest, int index) {

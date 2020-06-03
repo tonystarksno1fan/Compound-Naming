@@ -172,7 +172,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		}
 		else selected = null;
 		
-		System.out.println(selected.groupNumber);
+//		System.out.println(selected.groupNumber);
 	}
 
 	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
@@ -285,7 +285,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 				//if selected component collides with another component on the screen 
 				if(connect) {
-					System.out.println("currently selected: " + selected.getType() + " temp: " + temp.getType());
 					/*
 					 * add my atoms to group here
 					 */
@@ -308,7 +307,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					//care of that later
 					else if (selected.getType().equals("bond") && temp.getType().equals("atom")) {
 						mol.bonds.get(selected.bondNumber-1).setGroup(temp.groupNumber);
-						System.out.println("dropped");
 					}
 
 					if(temp.group>=0) {
@@ -388,18 +386,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(e.getActionCommand().equals("compile")) {	
 			System.out.println("atoms: " + mol.atoms.size() + " bonds: " + mol.bonds.size() + " groups: " 
 					+ mol.groups.size());
-
-			for (Bond b : mol.bonds) {
-				if (b.getType().equals("double")) {
-					mol.bondType = "double";
-					break;
-				}
-				if (b.getType().equals("triple")) {
-					mol.bondType = "triple";
-					break;
-				}
-			}
-			mol.assemble();
 			mol.assemble();											//fix assemble function
 			//			Set<Integer> molecule = mol.molecule.keySet();
 			//			for (Integer i : molecule) {
