@@ -7,6 +7,8 @@ public class Molecule {
 	String bondType = "single";
 	int[][] path; //an array of all possible paths
 	int longest = 0;	//length of longest carbon chain
+	int farthest = 0;
+	int counter = 0;
 	ArrayList<Integer> outer; //outer edges of the graph/molecule
 	ArrayList<Atom> atoms;
 	ArrayList<Group> groups;
@@ -31,11 +33,13 @@ public class Molecule {
 			visited = new boolean[molecule.size() + 1];		//finds group farthest from starting point
 			findLongest(1, 0, false);
 			longest = 0;
+			System.out.println("farthest1: " + farthest);
 			
 			visited = new boolean[molecule.size() + 1];		//finds group farthest from above (other end of the molecule)
-			findLongest(1, 0, false);
+			findLongest(farthest, 0, false);
+			System.out.println("farthest2: " + farthest);
 			visited = new boolean[molecule.size()+1];		//finds all farthest groups
-			findLongest(1, 0, true);
+			findLongest(farthest, 0, true);			
 			path = new int[outer.size()][molecule.size()+1];
 			longest = 0;
 			System.out.println("outer: " + outer.size());
@@ -68,10 +72,61 @@ public class Molecule {
 			out += "ane";
 		}
 		else if (bondType.equals("double")) {
-
+			ArrayList<Integer> doubles = findBonds(bonds, bondType);
+			counter = molecule.size();
+			//recursively get edge?
+			int edge = getEdge(doubles, 0);
+			System.out.println("edge: " + edge);
 		}
 		else if (bondType.equals("triple")) {
-
+			
+		}
+		return out;
+	}
+	
+	public int getEdge (ArrayList<Integer> arr, int c) {
+		int out = arr.get(0);
+		for (Integer i : arr) {
+			visited = new boolean[molecule.size() + 1];	
+			c = shortestPath(0, counter, i);
+			if (c < counter) {
+				counter = c;
+				out = i;
+			}
+		}
+		return out;
+	}
+	
+	public int shortestPath(int counter, int shortest, int index) {
+		if (groups.get(index).c > 0) {
+			counter++;
+		}
+		visited[index] = true;
+		if (molecule.get(index).size() == 1) {
+			if (counter < shortest) {
+				shortest = counter;
+			}
+		}
+		if (molecule.get(index) == null) {
+			// base case where u does not have any kids
+			return shortest;
+		}
+		for (int n : molecule.get(index)) {
+			if (!visited[n]) {			
+				visited[n] = true;
+				shortestPath(counter, shortest, index);
+			}
+		}
+		return shortest;
+	}
+	
+	public ArrayList<Integer> findBonds(ArrayList<Bond> list, String type) {
+		ArrayList<Integer> out = new ArrayList<>();
+		for (Bond b : list) {
+			if (b.getType().equals(type)) {
+				out.add(b.getG1());
+				out.add(b.getG2());
+			}
 		}
 		return out;
 	}
@@ -223,6 +278,15 @@ public class Molecule {
 			}
 			molecule.get(y).add(x); // map.get(y) is a LinkedList. Append x.
 		}
+		
+		Set<Integer> keys = molecule.keySet();
+		for (Integer i : keys) {
+			System.out.print("group " + i + ": ");
+			for (Integer k : molecule.get(i)) {
+				System.out.print(k + " ");
+			}
+			System.out.println();
+		}
 	}
 
 	public void findLongest(int s, int counter, boolean storingOuter) {
@@ -236,6 +300,7 @@ public class Molecule {
 		else {
 			if (counter > longest) {
 				longest = counter;
+				farthest = s;
 			}
 		}
 		if (molecule.get(s) == null) {
