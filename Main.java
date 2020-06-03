@@ -172,7 +172,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		}
 		else selected = null;
 		
-//		System.out.println(selected.groupNumber);
 		//System.out.println(selected.groupNumber);
 	}
 
@@ -180,7 +179,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(selected != null) {
 			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
 
-			boolean connect = true;
+			boolean connect = false;
 
 			if(temp != null && ((selected.getType().equals("bond") ^ temp.getType().equals("bond")) || 					//math to snap atoms into place
 					(!selected.getType().equals("bond") && !temp.getType().equals("bond")))) {							//bonds can't attach to bonds
@@ -191,6 +190,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[1] == null 
 				&& selected.bondedElements[3] == null) {										
 
+					connect = true;
+					
 					temp.bondedElements[1] = selected;
 					selected.bondedElements[3] = temp;
 
@@ -204,6 +205,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[3] == null 
 				&& selected.bondedElements[1] == null) {
 
+					connect = true;
+
 					temp.bondedElements[3] = selected;
 					selected.bondedElements[1] = temp;
 
@@ -215,6 +218,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2
 						&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {
 
+					connect = true;
+
 					temp.bondedElements[2] = selected;
 					selected.bondedElements[0] = temp;
 
@@ -225,14 +230,13 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2
 						&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
 
+					connect = true;
 
 					temp.bondedElements[0] = selected;
 					selected.bondedElements[2] = temp;
 
 					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
 				}
-
-				else if(selected.getType().equals("atom") && temp.getType().equals("atom")) connect = false;
 
 				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
 					if(selected.getY() >= temp.getY()+temp.getHeight()/2 
@@ -241,6 +245,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+
+						connect = true;
 
 						temp.bondedElements[2] = selected;
 						selected.bondedElements[0] = temp;
@@ -253,17 +259,20 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
 						int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
 
+						connect = true;
+
 						temp.bondedElements[0] = selected;
 						selected.bondedElements[2] = temp;
 
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
-					else if(selected.getType().equals("bond") && selected.angle != 0 && selected.angle != Math.PI) connect = false;
 				} 
 
 				else if(selected.getType().equals("atom") && temp.getType().equals("bond") && temp.angle != 0 && temp.angle != Math.PI) {				
 					if(selected.getY()+selected.getHeight()/2 <= temp.getY()+temp.getHeight()/2 && 
 							temp.bondedElements[0] == null && selected.bondedElements[2] == null) {									//Atom above bond
+
+						connect = true;
 
 						temp.bondedElements[0] = selected;
 						selected.bondedElements[2] = temp;
@@ -274,16 +283,15 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					else if(selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2 &&
 							temp.bondedElements[2] == null && selected.bondedElements[0] == null) {									//Atom below bond
 
+						connect = true;
+
 						temp.bondedElements[2] = selected;
 						selected.bondedElements[0] = temp;
 
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
 					}
-					else connect = false;
 				}
-
-				//System.out.println(connect);
-
+				
 				//if selected component collides with another component on the screen 
 				if(connect) {
 					/*
