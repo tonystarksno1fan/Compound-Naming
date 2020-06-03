@@ -19,11 +19,10 @@ public class Atom extends JPanel {
 	private int dy;
 
 	public Atom[] bondedElements = new Atom[] {null, null, null, null};
-	public int counted = 1;
 
 	public int group = -1;
 
-	public int groupNumber;
+	public int groupNumber = 0;
 	public int bondNumber = 0;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {
@@ -95,10 +94,16 @@ public class Atom extends JPanel {
 
 	public Atom objectCollision(int lastX, int lastY) {		//Goes through atomList in Main to check for a collision between Atom objects and the given X and Y 
 		//if(Main.atomList.size() <= 1) return null;
+		
+		int objectW = this.objectW;
+		int objectH = this.objectH;
 
 		if(angle != 0 && angle != Math.PI) {
 			lastX = lastX+objectW/2-objectH/2;
 			lastY = lastY+objectH/2-objectW/2;
+			
+			objectW = this.objectH;
+			objectH = this.objectW;
 		}
 
 		for(int i=0; i<Main.atomList.size(); i++) {
@@ -107,22 +112,29 @@ public class Atom extends JPanel {
 
 				int tempX = temp.lastX;
 				int tempY = temp.lastY;
+				
+				int tempW = temp.objectW;
+				int tempH = temp.objectH;
 
 				if(temp.angle != 0 && temp.angle != Math.PI) {
-					tempX = tempX+objectW/2-objectH/2;
-					tempY = tempY+objectH/2-objectW/2;
+					tempX = tempX+tempW/2-tempH/2;
+					tempY = tempY+tempH/2-tempW/2;
+					
+					tempW = temp.objectH;
+					tempH = temp.objectW;
 				}
 
 				if(temp.group < 0 || temp.group != group) {
-					if(		(lastY <= tempY+temp.objectH && lastY >= tempY) || 
-							(lastY+objectH <= tempY+temp.objectH && lastY+objectH >= tempY) ||
-							(lastY >= tempY && lastY+objectH <= tempY+temp.objectH) ||
-							(lastY <= tempY && lastX+objectH >= tempY+temp.objectH) ||
-							(angle!=0 && angle!=Math.PI && lastY+objectH <= tempY+temp.objectH && lastY+objectW >= tempY)) {
-
-						if(		(lastX>=tempX && lastX<=tempX+temp.objectW) || 
-								(lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
-
+					if(		(lastY+objectH <= tempY+tempH && lastY+objectH >= tempY) ||
+							(lastY >= tempY && lastY <= tempY+objectH) ||
+							(tempY+tempH <= lastY+objectH && tempY+tempH >= lastY) ||
+							(tempY >= lastY && tempY <= lastY+objectH)) {
+						
+						if(		(!(type.equals("bond") && temp.getType().equals("bond")) && lastX >= tempX && lastX <= tempX+tempW) || 
+								(!(type.equals("bond") && temp.getType().equals("bond")) && lastX+objectW >= tempX && lastX+objectW <= tempX+tempW) ||
+								(!(type.equals("bond") && temp.getType().equals("bond")) && lastX >= tempX && lastX+objectW <= tempX+tempW) ||
+								(!(type.equals("bond") && temp.getType().equals("bond")) && lastX <= tempX && lastX+objectW >= tempX+tempW)) {
+							
 							return temp;
 						}
 					}
@@ -155,14 +167,14 @@ public class Atom extends JPanel {
 	}
 
 	public void rotateRight() {
-		if(type.equalsIgnoreCase("atom")) return;
+		if(type.equals("atom")) return;
 
 		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
 		else angle += Math.PI/4;
 	}
 
 	public void rotateLeft() {
-		if(type.equalsIgnoreCase("atom")) return;
+		if(type.equals("atom")) return;
 
 		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
 		else angle -= Math.PI/4;
