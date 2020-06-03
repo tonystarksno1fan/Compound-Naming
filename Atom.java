@@ -19,11 +19,10 @@ public class Atom extends JPanel {
 	private int dy;
 
 	public Atom[] bondedElements = new Atom[] {null, null, null, null};
-	public int counted = 1;
 
 	public int group = -1;
 
-	public int groupNumber;
+	public int groupNumber = 0;
 	public int bondNumber = 0;
 
 	public Atom(String name, int x, int y, int width, int height, String type) {
@@ -118,11 +117,24 @@ public class Atom extends JPanel {
 							(lastY+objectH <= tempY+temp.objectH && lastY+objectH >= tempY) ||
 							(lastY >= tempY && lastY+objectH <= tempY+temp.objectH) ||
 							(lastY <= tempY && lastX+objectH >= tempY+temp.objectH) ||
-							(angle!=0 && angle!=Math.PI && lastY+objectH <= tempY+temp.objectH && lastY+objectW >= tempY)) {
+							(angle!=0 && angle!=Math.PI && lastY+objectH <= tempY+temp.objectH && lastY+objectW >= tempY) ||
+							(temp.angle!=0 && temp.angle!=Math.PI && tempY+temp.objectW <= lastY+objectH && tempY+temp.objectW >= lastY)) {
 
-						if(		(lastX>=tempX && lastX<=tempX+temp.objectW) || 
-								(lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
+						if(		(!(type.equals("bond") && temp.getType().equals("bond")) && lastX>=tempX && lastX<=tempX+temp.objectW) || 
+								(!(type.equals("bond") && temp.getType().equals("bond")) && lastX+objectW >= tempX && lastX+objectW <= tempX+temp.objectW)) {
 
+							System.out.println("\n------------------");
+							
+							System.out.println("Up: " + bondedElements[0]);
+							System.out.println("Right: " + bondedElements[1]);
+							System.out.println("Down: " + bondedElements[2]);
+							System.out.println("Left: " + bondedElements[3] + "\n");
+							
+							System.out.println("Up: " + temp.bondedElements[0]);
+							System.out.println("Right: " + temp.bondedElements[1]);
+							System.out.println("Down: " + temp.bondedElements[2]);
+							System.out.println("Left: " + temp.bondedElements[3] + "\n");
+							
 							return temp;
 						}
 					}

@@ -172,7 +172,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		}
 		else selected = null;
 		
-		System.out.println(selected.groupNumber);
+		//System.out.println(selected.groupNumber);
 	}
 
 	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
@@ -264,8 +264,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					if(selected.getY()+selected.getHeight()/2 <= temp.getY()+temp.getHeight()/2 && 
 							temp.bondedElements[0] == null && selected.bondedElements[2] == null) {									//Atom above bond
 
-						temp.bondedElements[2] = selected;
-						selected.bondedElements[0] = temp;
+						temp.bondedElements[0] = selected;
+						selected.bondedElements[2] = temp;
 
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, 
 								temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
@@ -353,11 +353,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 				System.out.println(dropTest);
 
-				if(dropTest.getType().equals("atom")) 
+				/*if(dropTest.getType().equals("atom")) 
 					mol.groups.remove(dropTest.groupNumber);
 
 				else if(dropTest.getType().equals("bond")) 
-					mol.bonds.remove(dropTest.bondNumber);
+					mol.bonds.remove(dropTest.bondNumber);*/
 				
 				if(dropTest.group >= 0)
 					groupList.get(dropTest.group).remove(dropTest);
