@@ -40,7 +40,7 @@ public class Molecule {
 			System.out.println("farthest2: " + farthest);
 			visited = new boolean[molecule.size()+1];		//finds all farthest groups
 			findLongest(farthest, 0, true);			
-			path = new int[outer.size()][molecule.size()+1];
+			path = new int[outer.size()*2][molecule.size()+1];
 			longest = 0;
 			System.out.println("outer: " + outer.size());
 			
@@ -48,12 +48,8 @@ public class Molecule {
 				visited = new boolean[molecule.size() + 1];
 				findPaths(i, outer.get(i), 0, new int[molecule.size()], 0);
 				if (longest > 1) {
-					System.out.println("starting index: " + path[i][longest-2]);
-					System.out.println("size: " + molecule.get(path[i][longest-2]).size());
 					for (Integer k : molecule.get(path[i][longest-2])) {
-						System.out.println(k + " ");
 						if (k != path[i][longest-3]) {
-							System.out.println("NOT EQUAL");
 							path[i][longest-1] = k;
 							break;
 						}
@@ -61,6 +57,7 @@ public class Molecule {
 				}
 				longest = 0;
 			}
+			reversePaths(outer.size());
 			
 			ArrayList<Integer> paths = longestPath(path);		//narrows it down to only the longest paths
 			System.out.println("longest paths: " + paths.size());
@@ -94,6 +91,21 @@ public class Molecule {
 			
 		}
 		return out;
+	}
+	
+	public void reversePaths(int n) {
+		int max = n;
+		System.out.println("n: " + n);
+		for (int i = 0; i < max; i++) {
+			int col = 0;
+			for (int k = path[i].length - 1; k >= 0; k--) {
+				if (path[i][k] != 0) {
+					path[n][col] = path[i][k];
+					col++;
+				}
+			}
+			n++;
+		}
 	}
 	
 	public int getEdge (int index, int c, int shortest) {
