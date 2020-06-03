@@ -81,6 +81,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		placeboList.add(new Atom("H", 90, 20, 20, 20, "atom"));
 		placeboList.add(new Atom("Single Bond", 50, 20, 30, 10, "bond"));
 		placeboList.add(new Atom("Double Bond", 120, 20, 30, 10, "bond"));
+		placeboList.add(new Atom("Triple Bond", 20, 50, 30, 10, "bond"));
 
 		Thread animationThread = new Thread(new Runnable() {	//The main loop
 			public void run() {
@@ -114,7 +115,6 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		public void mouseDragged(MouseEvent e) {							//Responsible for updating the location of the dragged object
 			mouseX = e.getX();												//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
-			//			System.out.println("x: " + mouseX + " y: " + mouseY);
 
 			if(selected == null) {
 				if(((JPanel)e.getSource()).getName().equals("panel")) {
@@ -164,13 +164,15 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(((JPanel)e.getSource()).getName().equals("panel")) {
 			for(int i=0; i<atomList.size(); i++) {
 				Atom temp = atomList.get(i);
-				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) {
+				
+				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) 
 					selected = temp;
-				}
 			}
 			if(selected == original) selected = null;
 		}
 		else selected = null;
+		
+		System.out.println(selected.groupNumber);
 	}
 
 	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
@@ -191,7 +193,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					temp.bondedElements[1] = selected;
 					selected.bondedElements[3] = temp;
 
-					selected.updateLocation(temp.getX()+temp.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+					selected.updateLocation(temp.getX()+temp.getWidth(), 
+							(temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
 				}
 
 				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Selected is on the left
@@ -203,7 +206,8 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 					temp.bondedElements[3] = selected;
 					selected.bondedElements[1] = temp;
 
-					selected.updateLocation(temp.getX()-selected.getWidth(), (temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+					selected.updateLocation(temp.getX()-selected.getWidth(), 
+							(temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
 				}
 
 				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is below
@@ -219,16 +223,15 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is above
 						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2
 						&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
-					
+
+
 					temp.bondedElements[0] = selected;
 					selected.bondedElements[2] = temp;
 
 					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
 				}
 
-				else connect = false;
-
-				//System.out.println(selected.getY()+selected.getHeight()/2 + ", " + (temp.getY()+temp.getHeight()/2) + ", " + temp.angle);
+				else if(selected.getType().equals("atom") && temp.getType().equals("atom")) connect = false;
 
 				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
 					if(selected.getY() >= temp.getY()+temp.getHeight()/2 
@@ -254,25 +257,31 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 
 						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
 					}
+					else if(selected.getType().equals("bond") && selected.angle != 0 && selected.angle != Math.PI) connect = false;
 				} 
 
-				else if(selected.getType().equals("atom") && temp.getType().equals("bond") && temp.angle != 0 && temp.angle != Math.PI) {					
-					if(selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2 && 
+				else if(selected.getType().equals("atom") && temp.getType().equals("bond") && temp.angle != 0 && temp.angle != Math.PI) {				
+					if(selected.getY()+selected.getHeight()/2 <= temp.getY()+temp.getHeight()/2 && 
 							temp.bondedElements[0] == null && selected.bondedElements[2] == null) {									//Atom above bond
 
 						temp.bondedElements[2] = selected;
 						selected.bondedElements[0] = temp;
 
-						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
+						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, 
+								temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
 					}
-					else if(temp.bondedElements[2] == null && selected.bondedElements[0] == null) {									//Atom below bond
+					else if(selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2 &&
+							temp.bondedElements[2] == null && selected.bondedElements[0] == null) {									//Atom below bond
 
 						temp.bondedElements[2] = selected;
 						selected.bondedElements[0] = temp;
 
 						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
 					}
+					else connect = false;
 				}
+
+				//System.out.println(connect);
 
 				//if selected component collides with another component on the screen 
 				if(connect) {
@@ -334,19 +343,40 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				/*
 				 * must remember to remove this dropped atom in the case that it gets attached to a group!
 				 */
+			}
+		}
 
-				for(Atom dropTest : atomList) {
-					if(dropTest.getX() > width-240) {
-						atomList.remove(dropTest);
-						if(dropTest.getType().equals("atom")) {
-							mol.groups.remove(dropTest.groupNumber);
-						}
-						else if(dropTest.getType().equals("bond")) {
-							mol.bonds.remove(dropTest.bondNumber);
-						}
-						dropTest = null;
-					}
-				}
+		Iterator<Atom> iter = atomList.iterator();												//Iterate through atomList to check if any should be removed
+
+		while(iter.hasNext()) {
+			Atom dropTest = iter.next();
+
+			if(dropTest.getX() > width-240) {	
+
+				System.out.println(dropTest);
+
+				if(dropTest.getType().equals("atom")) 
+					mol.groups.remove(dropTest.groupNumber);
+
+				else if(dropTest.getType().equals("bond")) 
+					mol.bonds.remove(dropTest.bondNumber);
+				
+				if(dropTest.group >= 0)
+					groupList.get(dropTest.group).remove(dropTest);
+
+				if(dropTest.bondedElements[0] != null)
+					dropTest.bondedElements[0].bondedElements[2] = null;
+
+				if(dropTest.bondedElements[1] != null)
+					dropTest.bondedElements[1].bondedElements[3] = null;
+
+				if(dropTest.bondedElements[2] != null)
+					dropTest.bondedElements[2].bondedElements[0] = null;
+
+				if(dropTest.bondedElements[3] != null)
+					dropTest.bondedElements[3].bondedElements[1] = null;
+
+				iter.remove();
 			}
 		}
 	}
@@ -358,6 +388,7 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 		if(e.getActionCommand().equals("compile")) {	
 			System.out.println("atoms: " + mol.atoms.size() + " bonds: " + mol.bonds.size() + " groups: " 
 					+ mol.groups.size());
+
 			for (Bond b : mol.bonds) {
 				if (b.getType().equals("double")) {
 					mol.bondType = "double";
@@ -369,6 +400,11 @@ public class Main implements ActionListener, KeyListener, MouseListener {
 				}
 			}
 			mol.assemble();
+			mol.assemble();											//fix assemble function
+			//			Set<Integer> molecule = mol.molecule.keySet();
+			//			for (Integer i : molecule) {
+			//				System.out.println(mol.molecule.get(i));
+			//			}
 			System.out.println(mol.name());
 		}
 

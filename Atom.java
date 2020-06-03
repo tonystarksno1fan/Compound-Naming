@@ -22,7 +22,7 @@ public class Atom extends JPanel {
 	public int counted = 1;
 
 	public int group = -1;
-	
+
 	public int groupNumber;
 	public int bondNumber = 0;
 
@@ -30,7 +30,7 @@ public class Atom extends JPanel {
 		this.name = name;
 		groupNumber = 0;
 		this.type = type;
-		
+
 		this.objectW = width;
 		this.objectH = height;
 
@@ -40,11 +40,11 @@ public class Atom extends JPanel {
 
 	public boolean equals(Object o) {
 		Atom a = (Atom) o;
-		
+
 		return (this.name.equals(a.name) && this.type.equals(a.type) && this.lastX == a.lastX && this.lastY == a.lastY
 				&& this.groupNumber == a.groupNumber);
 	}
-	
+
 	public void draw(Graphics g) {	//The object's own draw method (this is what canvas from the main class calls to draw onto panel)		
 		Graphics2D gg = (Graphics2D) g.create();
 
@@ -57,16 +57,23 @@ public class Atom extends JPanel {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
-		else if(name.equalsIgnoreCase("single bond")) {										//Draw single bond
+		else if(name.equalsIgnoreCase("Single Bond")) {										//Draw single bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/2, lastX+objectW, lastY+objectH/2);
 		}
-		else if(name.equalsIgnoreCase("double bond")) {										//Draw double bond
+		else if(name.equalsIgnoreCase("Double Bond")) {										//Draw double bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/3, lastX+objectW, lastY+objectH/3);
-			gg.drawLine(lastX+objectW/8, lastY+objectH/3 * 2, lastX+objectW/8 * 9, lastY+objectH/3 * 2);
+			gg.drawLine(lastX, lastY+objectH/3 * 2, lastX+objectW, lastY+objectH/3 * 2);
+		}
+		else if(name.equalsIgnoreCase("Triple Bond")) {										//Draw triple bond
+			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
+			
+			gg.drawLine(lastX, lastY+objectH/4, lastX+objectW, lastY+objectH/4);
+			gg.drawLine(lastX, lastY+objectH/4 * 2, lastX+objectW, lastY+objectH/4 * 2);
+			gg.drawLine(lastX, lastY+objectH/4 * 3, lastX+objectW, lastY+objectH/4 * 3);
 		}
 
 		if(Main.selected == this) {															//Draw the yellow "selected" halo
@@ -97,10 +104,10 @@ public class Atom extends JPanel {
 		for(int i=0; i<Main.atomList.size(); i++) {
 			if(Main.atomList.get(i) != this) {
 				Atom temp = Main.atomList.get(i);
-				
+
 				int tempX = temp.lastX;
 				int tempY = temp.lastY;
-				
+
 				if(temp.angle != 0 && temp.angle != Math.PI) {
 					tempX = tempX+objectW/2-objectH/2;
 					tempY = tempY+objectH/2-objectW/2;
@@ -167,17 +174,11 @@ public class Atom extends JPanel {
 		return false;		
 	}
 
-	/*public void addElement(String name) {
-		if (bondedElements.containsKey(name)) {
-			bondedElements.replace(name, bondedElements.get(name)+1);
-		}
-		else {
-			bondedElements.put(name, 1);
-		}
+	public boolean equals(Atom atom) {
+		if(name.equals(atom.name) && angle == atom.angle && lastX == atom.lastX && lastY == atom.lastY) 
+			return true;
+		return false;
 	}
-	public Integer getElement(String name) {
-		return bondedElements.get(name);
-	} */
 
 	//getters
 	public int getX() {
@@ -203,7 +204,7 @@ public class Atom extends JPanel {
 	public String getType() {
 		return type;
 	}
-	
+
 	public int getGroup() {
 		return groupNumber;
 	}
@@ -212,7 +213,7 @@ public class Atom extends JPanel {
 	public void setGroup(int n) {
 		groupNumber = n;
 	}
-	
+
 	public String toString() {
 		return name;
 	}
