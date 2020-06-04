@@ -60,16 +60,20 @@ public class Molecule {
 			reversePaths(outer.size());
 			
 			ArrayList<Integer> paths = longestPath(path);		//narrows it down to only the longest paths
-			System.out.println("longest paths: " + paths.size());
-			for (int i = 0; i < path.length; i++) {
-				for (int k = 0; k < path[0].length; k++) {
-					System.out.print(path[i][k] + " ");
-				}
-				System.out.println();
-			}
+//			System.out.println("longest paths: " + paths.size());
+//			for (int i = 0; i < path.length; i++) {
+//				for (int k = 0; k < path[0].length; k++) {
+//					System.out.print(path[i][k] + " ");
+//				}
+//				System.out.println();
+//			}
 			if (paths.size() > 1) {
 				int i = lowestNumerals(paths);
 				out += findBranches(i);
+				for (int k : path[i]) {
+					System.out.print(k + " ");
+				}
+				System.out.println();
 			}
 			else {
 				out += findBranches(paths.get(0));
@@ -95,7 +99,6 @@ public class Molecule {
 	
 	public void reversePaths(int n) {
 		int max = n;
-		System.out.println("n: " + n);
 		for (int i = 0; i < max; i++) {
 			int col = 0;
 			for (int k = path[i].length - 1; k >= 0; k--) {
@@ -170,6 +173,7 @@ public class Molecule {
 	public String findBranches(int n) {
 		boolean contains = false;
 		HashMap<Integer, String> map = new HashMap<>();	//tracks where the branch occurs and what the branch is called
+		HashMap<String, Integer> names = new HashMap<>();
 		String out = "";
 		for (int i = 0; i < path[n].length; i++) {		//cycles through the indices of the carbons on the longest carbon chain
 			if (path[n][i] == 0) {
@@ -184,17 +188,32 @@ public class Molecule {
 				}
 				if (!contains && groups.get(path[n][i] - 1).c > 0) {	//where i = current alkyl group and k is its branch
 					//					System.out.println("not contains: " + path[n][i]);s
-					map.put(i+1, getGroupName(i,k)); //only takes into account case where there's 1 alkyl branch
+					String dummy = getGroupName(i,k);
+					map.put(i+1, dummy); //only takes into account case where there's 1 alkyl branch
+					if (!names.containsKey(dummy)) {
+						names.put(dummy, 1);
+					}
+					else {
+						names.put(dummy, names.get(dummy)+1);
+					}
 				}
 				else if (contains) {
 					contains = false;
 				}
 			}
 		}
-		Set<Integer> set = map.keySet();
-		System.out.println("keySet: " + set.size());
-		for (int i : set) {
-			out += i + "-" + map.get(i) + "-";
+		Set<Integer> numberSet = map.keySet();
+		Set<String> nameSet = names.keySet();
+		System.out.println("keySet: " + numberSet.size());
+		for (String s : nameSet) {
+			for (int i : numberSet) {
+				if (map.get(i).equals(s)) {
+					out += i + ",";
+				}
+//				out += i + "-" + map.get(i) + "-";
+			}
+			out = out.substring(0, out.lastIndexOf(","));
+			out += "-" + Nomenclature.groupPrefixes.get(names.get(s)) + s + "-";
 		}
 		if (out.length() > 0) {
 			return out.substring(0, out.length()-1);
@@ -299,14 +318,14 @@ public class Molecule {
 			molecule.get(y).add(x); // map.get(y) is a LinkedList. Append x.
 		}
 		
-		Set<Integer> keys = molecule.keySet();
-		for (Integer i : keys) {
-			System.out.print("group " + i + ": ");
-			for (Integer k : molecule.get(i)) {
-				System.out.print(k + " ");
-			}
-			System.out.println();
-		}
+//		Set<Integer> keys = molecule.keySet();
+//		for (Integer i : keys) {
+//			System.out.print("group " + i + ": ");
+//			for (Integer k : molecule.get(i)) {
+//				System.out.print(k + " ");
+//			}
+//			System.out.println();
+//		}
 	}
 
 	public void findLongest(int s, int counter, boolean storingOuter) {
@@ -315,6 +334,7 @@ public class Molecule {
 		}
 		visited[s] = true;
 		if (storingOuter && counter == longest) {
+			System.out.println("adding to outer: " + s);
 			outer.add(s);
 		}
 		else {
