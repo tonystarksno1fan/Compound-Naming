@@ -220,6 +220,24 @@ public class Molecule {
 		}
 		return "";
 	}
+	
+	public String getGroupName(int temp, int cur) {
+		System.out.println("temp: " + temp);
+		int counter = 0;
+		int previous = cur;
+		int current = cur;
+		System.out.println("current: " + cur);
+		for (int i : molecule.get(current)) {
+			System.out.println(temp + ". " + i);
+			if (i != previous) {
+				counter++;
+				previous = current;
+				current = i;
+			}
+		}
+//		System.out.println("counter: " + counter);
+		return (Nomenclature.oPrefixes.get(counter) + "yl");
+	}
 
 	public int leastBranch(int p) {		//where int p = row of path
 		boolean contains = false;
@@ -280,22 +298,6 @@ public class Molecule {
 			}
 		}
 		return out;
-	}
-
-	public String getGroupName(int temp, int cur) {
-		int counter = 0;
-		int previous = temp;
-		int current = cur;
-
-		for (int i : molecule.get(current)) {
-			if (i != previous) {
-				counter++;
-				previous = current;
-				current = i;
-			}
-		}
-
-		return (Nomenclature.oPrefixes.get(counter) + "yl");
 	}
 
 	public void assemble() {
