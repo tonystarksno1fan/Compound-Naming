@@ -56,18 +56,18 @@ public class Atom extends JPanel {
 			gg.drawOval(lastX, lastY, objectW, objectH);
 			g.drawString(name, lastX+objectW/4+1, lastY+objectH-5);
 		}
-		else if(name.equalsIgnoreCase("Single Bond")) {										//Draw single bond
+		else if(name.equalsIgnoreCase("single")) {										//Draw single bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/2, lastX+objectW, lastY+objectH/2);
 		}
-		else if(name.equalsIgnoreCase("Double Bond")) {										//Draw double bond
+		else if(name.equalsIgnoreCase("double")) {										//Draw double bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 
 			gg.drawLine(lastX, lastY+objectH/3, lastX+objectW, lastY+objectH/3);
 			gg.drawLine(lastX, lastY+objectH/3 * 2, lastX+objectW, lastY+objectH/3 * 2);
 		}
-		else if(name.equalsIgnoreCase("Triple Bond")) {										//Draw triple bond
+		else if(name.equalsIgnoreCase("triple")) {										//Draw triple bond
 			gg.rotate(angle, lastX+objectW/2, lastY+objectH/2);
 			
 			gg.drawLine(lastX, lastY+objectH/4, lastX+objectW, lastY+objectH/4);
@@ -75,7 +75,7 @@ public class Atom extends JPanel {
 			gg.drawLine(lastX, lastY+objectH/4 * 3, lastX+objectW, lastY+objectH/4 * 3);
 		}
 
-		if(Main.selected == this) {															//Draw the yellow "selected" halo
+		if(GUI.selected == this) {															//Draw the yellow "selected" halo
 			gg.setColor(Color.yellow);
 			gg.setStroke(new BasicStroke(4));
 
@@ -93,7 +93,7 @@ public class Atom extends JPanel {
 	}
 
 	public Atom objectCollision(int lastX, int lastY) {		//Goes through atomList in Main to check for a collision between Atom objects and the given X and Y 
-		//if(Main.atomList.size() <= 1) return null;
+		//if(GUI.atomList.size() <= 1) return null;
 		
 		int objectW = this.objectW;
 		int objectH = this.objectH;
@@ -106,9 +106,9 @@ public class Atom extends JPanel {
 			objectH = this.objectW;
 		}
 
-		for(int i=0; i<Main.atomList.size(); i++) {
-			if(Main.atomList.get(i) != this) {
-				Atom temp = Main.atomList.get(i);
+		for(int i=0; i<GUI.atomList.size(); i++) {
+			if(GUI.atomList.get(i) != this) {
+				Atom temp = GUI.atomList.get(i);
 
 				int tempX = temp.lastX;
 				int tempY = temp.lastY;
@@ -151,12 +151,12 @@ public class Atom extends JPanel {
 		lastX = x;
 		lastY = y;
 
-		if(Main.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
+		if(GUI.groupList.size()>0 && group>=0) moveGroup(group, new ArrayList<Atom>(Arrays.asList(this)), dx, dy);
 	}
 
 	public void moveGroup(int move, ArrayList<Atom> moved ,int dx, int dy) {	//Move the atoms and bonds of the group this atom is attached to
-		for(int i=0; i<Main.groupList.get(move).size(); i++) {
-			Atom temp = Main.groupList.get(move).get(i);
+		for(int i=0; i<GUI.groupList.get(move).size(); i++) {
+			Atom temp = GUI.groupList.get(move).get(i);
 
 			if(temp != this && !matchList(temp, moved)) {
 				temp.lastX += dx;
@@ -178,6 +178,11 @@ public class Atom extends JPanel {
 
 		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
 		else angle -= Math.PI/4;
+	}
+	
+	public void rotate(int angle) {
+		this.angle += Math.toRadians(angle);
+		//this.angle += angle;
 	}
 
 	public boolean matchList(Atom atom, ArrayList<Atom> list) {		//Returns true if given ArrayList contains the given Atom object
