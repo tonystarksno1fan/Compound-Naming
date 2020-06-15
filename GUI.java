@@ -113,8 +113,8 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 	public void keyTyped(KeyEvent e) {}
 	public void keyPressed(KeyEvent e) {	
-		if(e.getKeyCode() == KeyEvent.VK_SHIFT) {										//Hold shift to snap rotations
-			snapRotation = true;					
+		if(e.getKeyCode() == KeyEvent.VK_SHIFT && selected != null) {										//Hold shift to snap rotations
+			snapRotation = true;
 			selected.angle = Math.toRadians((int) (30*(Math.round(Math.toDegrees(selected.angle)/30))));
 		}
 	}
@@ -139,7 +139,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					if(((JPanel)e.getSource()).getName().equals("panel")) {
 						for(int i=0; i<atomList.size(); i++) {
 							Atom temp = atomList.get(i);			
-							if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
+							if(mouseX>temp.getXPos() && mouseX<(temp.getXPos()+temp.getWidth()) && mouseY>temp.getYPos() && mouseY<(temp.getYPos()+temp.getHeight())) {
 								selected = temp;
 							}
 						}
@@ -147,8 +147,8 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					else {
 						for(int j=0; j<placeboList.size(); j++) {
 							Atom temp = placeboList.get(j);
-							if(mouseX>temp.getX() && mouseX<(temp.getX()+temp.getWidth()) && mouseY>temp.getY() && mouseY<(temp.getY()+temp.getHeight())) {
-								Atom temp2 = new Atom(temp.getName(), (width-240)+temp.getX(), temp.getY(), temp.getWidth(), temp.getHeight(), temp.getType());
+							if(mouseX>temp.getXPos() && mouseX<(temp.getXPos()+temp.getWidth()) && mouseY>temp.getYPos() && mouseY<(temp.getYPos()+temp.getHeight())) {
+								Atom temp2 = new Atom(temp.getName(), (width-240)+temp.getXPos(), temp.getYPos(), temp.getWidth(), temp.getHeight(), temp.getType());
 								atomList.add(temp2);
 								selected = temp2;
 								String type = temp2.getType();
@@ -199,7 +199,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 			for(int i=0; i<atomList.size(); i++) {
 				Atom temp = atomList.get(i);
 
-				if(e.getX()>temp.getX() && e.getX()<(temp.getX()+temp.getWidth()) && e.getY()>temp.getY() && e.getY()<(temp.getY()+temp.getHeight())) 
+				if(e.getX()>temp.getXPos() && e.getX()<(temp.getXPos()+temp.getWidth()) && e.getY()>temp.getYPos() && e.getY()<(temp.getYPos()+temp.getHeight())) 
 					selected = temp;
 			}
 			if(!SwingUtilities.isRightMouseButton(e) && selected == original) selected = null;
@@ -209,120 +209,88 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
 		if(selected != null) {
-			Atom temp = selected.objectCollision(selected.getX(), selected.getY());
+			Atom temp = selected.objectCollision();
 
-			boolean connect = false;
+			boolean connect = true;
 
-			if(temp != null && ((selected.getType().equals("bond") ^ temp.getType().equals("bond")) || 					//math to snap atoms into place
-					(!selected.getType().equals("bond") && !temp.getType().equals("bond")))) {							//bonds can't attach to bonds
+			if(temp != null && (!(selected.getType().equals("bond") && temp.getType().equals("bond")))) {					//bonds can't attach to bonds
 
-				if(selected.getX()+selected.getWidth()/2 >= temp.getX()+temp.getWidth()/2 &&							//Selected is on the right
-						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2)) 
-				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[1] == null 
-				&& selected.bondedElements[3] == null) {										
+				if(temp.getType().equals("atom") && selected.getType().equals("atom") &&									//Selected is on the right
+						selected.getXPos()+selected.getWidth()/2 >= temp.getXPos()+temp.getWidth()/2 &&							
+						Math.abs((selected.getXPos()+selected.getWidth()/2)-(temp.getXPos()+temp.getWidth()/2)) >
+						Math.abs((selected.getYPos()+selected.getHeight()/2)-(temp.getYPos()+temp.getHeight()/2))) {
 
-					connect = true;
-
-					temp.bondedElements[1] = selected;
-					selected.bondedElements[3] = temp;
-
-					selected.updateLocation(temp.getX()+temp.getWidth(), 
-							(temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+					selected.updateLocation(temp.getXPos()+temp.getWidth(), 
+							(temp.getYPos()+temp.getHeight()/2) - (selected.getYPos()+selected.getHeight()/2) + selected.getYPos());
 				}
 
-				else if(selected.getX()+selected.getWidth()/2 < temp.getX()+temp.getWidth()/2 && 						//Selected is on the left
-						Math.abs((selected.getX()+selected.getWidth()/2)-(temp.getX()+temp.getWidth()/2)) >
-				Math.abs((selected.getY()+selected.getHeight()/2)-(temp.getY()+temp.getHeight()/2))  
-				&& (selected.angle == Math.PI || selected.angle == 0) && temp.bondedElements[3] == null 
-				&& selected.bondedElements[1] == null) {
+				else if(temp.getType().equals("atom") && selected.getType().equals("atom") &&								//Selected is on the left
+						selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2 && 						
+						Math.abs((selected.getXPos()+selected.getWidth()/2)-(temp.getXPos()+temp.getWidth()/2)) >
+				Math.abs((selected.getYPos()+selected.getHeight()/2)-(temp.getYPos()+temp.getHeight()/2))) {
 
-					connect = true;
-
-					temp.bondedElements[3] = selected;
-					selected.bondedElements[1] = temp;
-
-					selected.updateLocation(temp.getX()-selected.getWidth(), 
-							(temp.getY()+temp.getHeight()/2) - (selected.getY()+selected.getHeight()/2) + selected.getY());
+					selected.updateLocation(temp.getXPos()-selected.getWidth(), 
+							(temp.getYPos()+temp.getHeight()/2) - (selected.getYPos()+selected.getHeight()/2) + selected.getYPos());
 				}
 
 				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is below
-						&& selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2
-						&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {
+						&& selected.getYPos()+selected.getHeight()/2 >= temp.getYPos()+temp.getHeight()/2) {
 
-					connect = true;
-
-					temp.bondedElements[2] = selected;
-					selected.bondedElements[0] = temp;
-
-					selected.updateLocation(temp.getX(), temp.getY()+temp.getHeight());
+					selected.updateLocation(temp.getXPos(), temp.getYPos()+temp.getHeight());
 				}
 
 				else if(temp.getType().equals("atom") && selected.getType().equals("atom")								//Selected is above
-						&& selected.getY()+selected.getHeight()/2 < temp.getY()+temp.getHeight()/2
-						&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {
+						&& selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getHeight()/2) {
 
-					connect = true;
-
-					temp.bondedElements[0] = selected;
-					selected.bondedElements[2] = temp;
-
-					selected.updateLocation(temp.getX(), temp.getY()-selected.getHeight());
+					selected.updateLocation(temp.getXPos(), temp.getYPos()-selected.getHeight());
 				}
+				else if(!(temp.getType().equals("atom") && selected.getType().equals("atom"))) {
 
-				if(selected.getType().equals("bond")) {													//Only apply these transformations for bonds
-					if(selected.getY() >= temp.getY()+temp.getHeight()/2 
-							&& selected.angle != 0 && selected.angle != Math.PI
-							&& temp.bondedElements[2] == null && selected.bondedElements[0] == null) {	//Rotated component is below target		
+					System.out.println((selected.getType().equals("bond") && (Math.abs(selected.angle) == Math.PI/4 || 
+							Math.abs(selected.angle) == Math.PI/2 || selected.angle == 0))
+							|| (temp.getType().equals("bond") && (Math.abs(temp.angle) == Math.PI/4 || 
+							Math.abs(temp.angle) == Math.PI/2 || temp.angle == 0)));
+					System.out.println((temp.getType().equals("atom") && selected.getYPos()+selected.getWidth()/2 < temp.getYPos()+temp.getHeight()/2));
+					System.out.println((temp.getType().equals("bond") && selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getWidth()/2));
 
-						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
-						int dy = (temp.getY()+temp.getHeight()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+					System.out.println(selected.getYPos()+selected.getWidth()/2 + ", " + temp.getYPos()+temp.getHeight()/2);
+					System.out.println(Math.abs(selected.angle) + ", " + Math.abs(temp.angle) + ", " + Math.PI/4 + ", " + Math.PI/2 + "\n");
 
-						connect = true;
+					int direction = 1;
+					if(((!selected.getType().equals("atom") && (Math.abs(selected.angle) == Math.PI/4 || 
+							Math.abs(selected.angle) == Math.PI/2 ||selected.angle == 0))
+							|| (!temp.getType().equals("atom") && (Math.abs(temp.angle) == Math.PI/4 ||
+							Math.abs(temp.angle) == Math.PI/2 ||temp.angle == 0))) &&
+							
+							((temp.getType().equals("atom") && selected.getYPos()+selected.getWidth()/2 < temp.getYPos()+temp.getHeight()/2) ||
+									(temp.getType().equals("bond") && selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getWidth()/2))) {
 
-						temp.bondedElements[2] = selected;
-						selected.bondedElements[0] = temp;
-
-						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+						direction = -1;
 					}
-					else if(selected.getY() < temp.getY()+temp.getHeight()/2 && selected.angle != 0 && selected.angle != Math.PI
-							&& temp.bondedElements[0] == null && selected.bondedElements[2] == null) {	//Rotated component is above target		
+					else 
+						if((selected.getXPos()+selected.getWidth()/2) < (temp.getXPos()+temp.getWidth()/2)) {
+							System.out.println("Sdfsdf");
+							direction = -1;
+						}
 
-						int dx = (temp.getX()+temp.getWidth()/2-selected.getHeight()/2) - (selected.getX()+selected.getWidth()/2-selected.getHeight()/2);
-						int dy = (temp.getY()-selected.getWidth()) - (selected.getY()+selected.getHeight()/2-selected.getWidth()/2);
+					double x = (temp.getXPos()+temp.getWidth()/2) - (selected.getXPos()+selected.getWidth()/2);
+					double y = (temp.getYPos()+temp.getHeight()/2) - (selected.getYPos()+selected.getHeight()/2);
 
-						connect = true;
+					selected.updateLocation(selected.getXPos()+x, selected.getYPos()+y);
 
-						temp.bondedElements[0] = selected;
-						selected.bondedElements[2] = temp;
-
-						selected.updateLocation(selected.getX()+dx, selected.getY()+dy);
+					if(selected.getType().equals("bond")) {
+						x = (Math.cos(selected.angle) * temp.getWidth()/2) + (Math.cos(selected.angle) * selected.getWidth()/2);
+						y = (Math.sin(selected.angle) * temp.getWidth()/2) + (Math.sin(selected.angle) * selected.getWidth()/2);
 					}
-				} 
-
-				else if(selected.getType().equals("atom") && temp.getType().equals("bond") && temp.angle != 0 && temp.angle != Math.PI) {				
-					if(selected.getY()+selected.getHeight()/2 <= temp.getY()+temp.getHeight()/2 && 
-							temp.bondedElements[0] == null && selected.bondedElements[2] == null) {									//Atom above bond
-
-						connect = true;
-
-						temp.bondedElements[0] = selected;
-						selected.bondedElements[2] = temp;
-
-						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, 
-								temp.getY()+temp.getHeight()/2-temp.getWidth()/2-selected.getHeight());
+					else {
+						x = (Math.cos(temp.angle) * temp.getWidth()/2) + (Math.cos(temp.angle) * selected.getWidth()/2);
+						y = (Math.sin(temp.angle) * temp.getWidth()/2) + (Math.sin(temp.angle) * selected.getWidth()/2);
 					}
-					else if(selected.getY()+selected.getHeight()/2 >= temp.getY()+temp.getHeight()/2 &&
-							temp.bondedElements[2] == null && selected.bondedElements[0] == null) {									//Atom below bond
 
-						connect = true;
-
-						temp.bondedElements[2] = selected;
-						selected.bondedElements[0] = temp;
-
-						selected.updateLocation(temp.getX()+temp.getWidth()/2-selected.getWidth()/2, temp.getY()+temp.getHeight()/2+temp.getWidth()/2);
-					}
+					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
+					System.out.println(x + ", " + y + ", " + selected.angle + "\n");
 				}
+				else connect = false;
 
 				//if selected component collides with another component on the screen 
 				if(connect) {
@@ -333,9 +301,9 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					//when 2 atoms collide with each other
 					if(selected.getType().equals("atom") && temp.getType().equals("atom")) {
 						int g = temp.getGroup();		
-						mol.groups.remove(selected.groupNumber-1);
-						selected.setGroup(g);
-						mol.groups.get(g-1).addAtom(selected);
+						//mol.groups.remove(selected.groupNumber-1);
+						//selected.setGroup(g);
+						//mol.groups.get(g-1).addAtom(selected);
 					}
 					//when an atom collides with a bond
 					else if (selected.getType().equals("atom") && temp.getType().equals("bond")) {
@@ -390,7 +358,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 		while(iter.hasNext()) {
 			Atom dropTest = iter.next();
 
-			if(dropTest.getX() > width-240) {	
+			if(dropTest.getXPos() > width-240) {	
 
 				System.out.println(dropTest);
 
@@ -402,18 +370,6 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 				if(dropTest.group >= 0)
 					groupList.get(dropTest.group).remove(dropTest);
-
-				if(dropTest.bondedElements[0] != null)
-					dropTest.bondedElements[0].bondedElements[2] = null;
-
-				if(dropTest.bondedElements[1] != null)
-					dropTest.bondedElements[1].bondedElements[3] = null;
-
-				if(dropTest.bondedElements[2] != null)
-					dropTest.bondedElements[2].bondedElements[0] = null;
-
-				if(dropTest.bondedElements[3] != null)
-					dropTest.bondedElements[3].bondedElements[1] = null;
 
 				iter.remove();
 			}
@@ -435,20 +391,6 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 			System.out.println(mol.name());
 		}
 		if(e.getActionCommand().equals("detach")) {
-			try {
-				selected.bondedElements[0].bondedElements[2] = null;
-				selected.bondedElements[0] = null;
-
-				selected.bondedElements[1].bondedElements[3] = null;
-				selected.bondedElements[1] = null;
-
-				selected.bondedElements[2].bondedElements[0] = null;
-				selected.bondedElements[2] = null;
-
-				selected.bondedElements[3].bondedElements[1] = null;
-				selected.bondedElements[3] = null;
-			} catch(NullPointerException e3) {};
-
 			groupList.get(selected.group).remove(selected);
 			selected.group = -1;
 		}
@@ -463,13 +405,13 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 			g.drawString("This is a rotation demo", (width-240)/2, height/2);
 			g.drawString("Hold down right mouse and drag with a selected bond to rotate it", (width-240)/2, height/2+20);
 			g.drawString("Hold down shift while dragging to automatically snap to 30 degrees", (width-240)/2, height/2+40);
-			
+
 			g.drawString("An effective collision detection and connection snapping system ", (width-240)/2, height/2+80);
 			g.drawString("is currently in the works", (width-240)/2, height/2+100);
-			
+
 			g.drawString("Added a new \"detach\" button to detach the selected atom from", (width-240)/2, height/2+140);
 			g.drawString("its group so that it can move freely", (width-240)/2, height/2+160);
-			
+
 			g.drawString("Will improve this feature by making it so detaching an atom", (width-240)/2, height/2+200);
 			g.drawString("located in the centre of a group slipts the group instead of", (width-240)/2, height/2+220);
 			g.drawString("only detaching the one atom", (width-240)/2, height/2+240);
