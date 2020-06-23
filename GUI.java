@@ -246,41 +246,74 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 				}
 				else if(!(temp.getType().equals("atom") && selected.getType().equals("atom"))) {
 
-					System.out.println((selected.getType().equals("bond") && (Math.abs(selected.angle) == Math.PI/4 || 
-							Math.abs(selected.angle) == Math.PI/2 || selected.angle == 0))
-							|| (temp.getType().equals("bond") && (Math.abs(temp.angle) == Math.PI/4 || 
-							Math.abs(temp.angle) == Math.PI/2 || temp.angle == 0)));
-					System.out.println((temp.getType().equals("atom") && selected.getYPos()+selected.getWidth()/2 < temp.getYPos()+temp.getHeight()/2));
-					System.out.println((temp.getType().equals("bond") && selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getWidth()/2));
+					int direction = 1;							//Direction inverter
 
-					System.out.println(selected.getYPos()+selected.getWidth()/2 + ", " + temp.getYPos()+temp.getHeight()/2);
-					System.out.println(Math.abs(selected.angle) + ", " + Math.abs(temp.angle) + ", " + Math.PI/4 + ", " + Math.PI/2 + "\n");
+					boolean left = false;						//Snapped to the left, meaning negative delta x
+					boolean up = false;							//Snapped up, meaning negative delta y
 
-					int direction = 1;
-					if(((!selected.getType().equals("atom") && (Math.abs(selected.angle) == Math.PI/4 || 
-							Math.abs(selected.angle) == Math.PI/2 ||selected.angle == 0))
-							|| (!temp.getType().equals("atom") && (Math.abs(temp.angle) == Math.PI/4 ||
-							Math.abs(temp.angle) == Math.PI/2 ||temp.angle == 0))) &&
-							
-							((temp.getType().equals("atom") && selected.getYPos()+selected.getWidth()/2 < temp.getYPos()+temp.getHeight()/2) ||
-									(temp.getType().equals("bond") && selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getWidth()/2))) {
+					if(selected.getType().equals("bond")) {		//Snap settings for bonds
 
-						direction = -1;
-					}
-					else 
-						if((selected.getXPos()+selected.getWidth()/2) < (temp.getXPos()+temp.getWidth()/2)) {
-							System.out.println("Sdfsdf");
-							direction = -1;
+						if(selected.angle == Math.PI || selected.angle == 0) {			//Check if bond should be snapped right or left relative to Atom
+							selected.angle = 0;											//
+
+							if(selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2)
+								left = true;
 						}
 
+						else if(selected.angle == Math.PI/2 || selected.angle == Math.PI/2*3) {		//Check if bond should be snapped up or down
+							selected.angle = Math.PI/2;
+
+							if(selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getHeight()/2)
+								up = true;
+						}
+
+						else if((selected.getYPos()+selected.getHeight()/2 > temp.getYPos()+temp.getHeight()/2 &&	//For quadrants 1 and 3 relative to Atom
+								selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2) ||
+								(selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getHeight()/2 && 
+										selected.getXPos()+selected.getWidth()/2 > temp.getXPos()+temp.getWidth()/2)) {
+
+							if((selected.angle < Math.PI && selected.getXPos()+selected.getWidth()/2 > temp.getXPos()+temp.getWidth()/2) ||
+									(selected.angle > Math.PI && selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2)) {
+
+								direction = -1;
+							}
+						}
+						else {																						//For quadrants 2 and 4 relative to Atom
+							if((selected.angle > Math.PI && selected.getXPos()+selected.getWidth()/2 > temp.getXPos()+temp.getWidth()/2) ||
+									(selected.angle < Math.PI && selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2)) {
+
+								direction = -1;
+							}
+						}
+					}
+					else {																							//Snapping settings for Atoms
+						if(temp.angle == Math.PI/2 || temp.angle == Math.PI/2*3) {
+							temp.angle = Math.PI/2;
+
+							if(selected.getYPos()+selected.getHeight()/2 < temp.getYPos()+temp.getWidth()/2) 
+								direction = -1;
+						}
+						else if(temp.angle == Math.PI) temp.angle = 0;
+
+						else 
+							if(selected.getXPos()+selected.getWidth()/2 < temp.getXPos()+temp.getWidth()/2) 
+								direction = -1;
+					}
+
+					//Move center of selected to center of temp
 					double x = (temp.getXPos()+temp.getWidth()/2) - (selected.getXPos()+selected.getWidth()/2);
 					double y = (temp.getYPos()+temp.getHeight()/2) - (selected.getYPos()+selected.getHeight()/2);
 
-					selected.updateLocation(selected.getXPos()+x, selected.getYPos()+y);
+					selected.updateLocation(selected.getXPos()+x, selected.getYPos()+y);		
 
-					if(selected.getType().equals("bond")) {
+					//Move selected to edge of temp based on trig calculations
+					if(selected.getType().equals("bond")) {						
 						x = (Math.cos(selected.angle) * temp.getWidth()/2) + (Math.cos(selected.angle) * selected.getWidth()/2);
 						y = (Math.sin(selected.angle) * temp.getWidth()/2) + (Math.sin(selected.angle) * selected.getWidth()/2);
+
+						if(left) x = -x;
+						else if(up) y = -y;
+
 					}
 					else {
 						x = (Math.cos(temp.angle) * temp.getWidth()/2) + (Math.cos(temp.angle) * selected.getWidth()/2);
@@ -288,7 +321,10 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					}
 
 					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
-					System.out.println(x + ", " + y + ", " + selected.angle + "\n");
+
+					//System.out.println(Math.cos(selected.angle) + ", " + (temp.getWidth()/2) + ", " + (selected.getWidth()/2));
+					//System.out.println(direction);
+					//System.out.println(x + ", " + y + ", " + selected.angle + "\n");
 				}
 				else connect = false;
 
@@ -359,8 +395,6 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 			Atom dropTest = iter.next();
 
 			if(dropTest.getXPos() > width-240) {	
-
-				System.out.println(dropTest);
 
 				/*if(dropTest.getType().equals("atom")) 
 					mol.groups.remove(dropTest.groupNumber);
