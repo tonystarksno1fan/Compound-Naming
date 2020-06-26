@@ -37,7 +37,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 	private static final JPanel controls = new JPanel();			//Top panel use for controls
 
 	public GUI() {
-		frame = new JFrame("Wowowowowow");	
+		frame = new JFrame("Compound Naming");	
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(width, height));
 		frame.setResizable(false);
@@ -173,21 +173,17 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 				int mouseX = (int) (e.getX() - (selected.getXPos()+selected.getWidth()/2));						//Set mouse coordinates relative to center of 
 				int mouseY = (int) (e.getY() - (selected.getYPos()+selected.getHeight()/2));					//selected as the origin
 
-				if((mouseX > 0 && mouseY > 0) || (mouseX < 0 && mouseY < 0)) referenceAxis = mouseX;			//Determine with axis to use as the "opposite"
-				else referenceAxis = mouseY;
+				if((mouseX > 0 && mouseY > 0) || (mouseX < 0 && mouseY < 0)) referenceAxis = mouseY;			//Determine with axis to use as the "opposite"
+				else referenceAxis = mouseX;
 
 				angle = Math.toDegrees(Math.asin(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));	//opposite over hypotenuse
 
-				if(mouseX < 0 && mouseY < 0) angle += 90;				//Increase the angle based on which sector the mouse is in
-				else if(mouseX < 0 && mouseY > 0) {
-					angle += 180;
-					angle = -angle;
-				}
-				else if(mouseX > 0 && mouseY > 0) {
-					angle += 270;
-					angle = -angle;
-				}
-
+				if(!(mouseX > 0)) angle = -angle;
+				
+				if(mouseX < 0 && mouseY > 0) angle += 90;
+				else if(mouseX < 0 && mouseY < 0) angle += 180;
+				else if(mouseX > 0 && mouseY < 0) angle += 270;
+				
 				if(!snapRotation || (snapRotation && Math.abs((int)(angle)%30) == 0))		//Rotate, if snapRotation is on then rotate only every 30 degrees
 					selected.rotate(angle);
 			}
@@ -259,7 +255,13 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 					boolean left = false;						//Snapped to the left, meaning negative delta x
 					boolean up = false;							//Snapped up, meaning negative delta y
+					
+					double tempAngle = Math.toDegrees(temp.angle);				//Temporary angle used for calculating snap for Atoms to bonds
 
+					if(tempAngle > 180 && tempAngle < 270) tempAngle = Math.toRadians(tempAngle+180);		//Keep angles in sectors 1 and 2
+					else if(tempAngle > 90 && tempAngle < 180) tempAngle = Math.toRadians(tempAngle+180);
+					else tempAngle = Math.toRadians(tempAngle);
+					
 					if(selected.getType().equals("bond")) {		//Snap settings for bonds
 
 						if(selected.angle == Math.PI || selected.angle == 0) {			//Check if bond should be snapped right or left relative to Atom
@@ -325,10 +327,10 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 					}
 					else {
-						x = (Math.cos(temp.angle) * temp.getWidth()/2) + (Math.cos(temp.angle) * selected.getWidth()/2);
-						y = (Math.sin(temp.angle) * temp.getWidth()/2) + (Math.sin(temp.angle) * selected.getWidth()/2);
+						x = (Math.cos(tempAngle) * temp.getWidth()/2) + (Math.cos(tempAngle) * selected.getWidth()/2);
+						y = (Math.sin(tempAngle) * temp.getWidth()/2) + (Math.sin(tempAngle) * selected.getWidth()/2);
 					}
-
+										
 					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
 				}
 				else connect = false;

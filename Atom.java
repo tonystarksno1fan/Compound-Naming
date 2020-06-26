@@ -21,8 +21,6 @@ public class Atom extends JPanel {
 	private double dx;				//Delta X and Y is how much the coordinates changed from the previous location. Used to move the group this Atom is attached to
 	private double dy;
 
-	//public Atom[] bondedElements = new Atom[] {null, null, null, null};
-
 	public int group = -1;
 
 	public int groupNumber = 0;
@@ -147,7 +145,7 @@ public class Atom extends JPanel {
 
 	public void rotate(double angle) {
 		if(type.equals("atom")) return;								//Don't rotate atoms
-
+		
 		this.angle = Math.toRadians(angle);
 	}
 
