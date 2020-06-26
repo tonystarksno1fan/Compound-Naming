@@ -94,7 +94,7 @@ public class Atom extends JPanel {
 
 		area = new Area(path);
 
-		if(GUI.selected == this) {															//Draw the yellow "selected" halo
+		if(GUI.selected == this) {										//Draw the yellow "selected" halo
 			gg.setColor(Color.yellow);
 			gg.setStroke(new BasicStroke(4));
 
@@ -111,7 +111,7 @@ public class Atom extends JPanel {
 		gg.dispose();
 	}
 
-	public Atom objectCollision() {		//Goes through atomList in GUI to check for a collision between Atom objects
+	public Atom objectCollision() {							//Goes through atomList in GUI to check for a collision between Atom objects
 		for(Atom temp : GUI.atomList) {
 			Area tempArea = new Area(temp.area);
 
@@ -145,30 +145,10 @@ public class Atom extends JPanel {
 		}
 	}
 
-	public void rotateRight() {
-		if(type.equals("atom")) return;
+	public void rotate(double angle) {
+		if(type.equals("atom")) return;								//Don't rotate atoms
 
-		if(angle + Math.PI/4 >= Math.PI*2) angle = 0;
-		else angle += Math.PI/4;
-	}
-
-	public void rotateLeft() {
-		if(type.equals("atom")) return;
-
-		if(angle - Math.PI/4 <= Math.PI*-2) angle = 0;
-		else angle -= Math.PI/4;
-	}
-
-	public void rotate(int angle) {
-		if(type.equals("atom")) return;
-
-		if(this.angle + Math.toRadians(angle) > Math.PI*2)
-			this.angle = 0;
-		
-		if(this.angle + Math.toRadians(angle) < 0)
-			this.angle = Math.PI*2 - Math.toRadians(angle);
-		else 
-			this.angle += Math.toRadians(angle);
+		this.angle = Math.toRadians(angle);
 	}
 
 	public boolean matchList(Atom atom, ArrayList<Atom> list) {		//Returns true if given ArrayList contains the given Atom object

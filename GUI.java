@@ -12,10 +12,8 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 	public static int mouseX;
 	public static int mouseY;
 
-	public static int startPos;
-	public int referencePos;
-
 	public static boolean snapRotation = false;
+	public static boolean rotation = false;
 
 	public static Atom selected;	//Current Atom object that is "selected" by the user
 
@@ -115,15 +113,11 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {	
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT && selected != null) {										//Hold shift to snap rotations
 			snapRotation = true;
-			selected.angle = Math.toRadians((int) (30*(Math.round(Math.toDegrees(selected.angle)/30))));
 		}
 	}
 
 	public void keyReleased(KeyEvent e) {									
 		if(selected != null) {
-			if(e.getKeyCode() == KeyEvent.VK_A) selected.rotateLeft();					//A to rotate selected object left, B to rotate right
-			else if(e.getKeyCode() == KeyEvent.VK_D) selected.rotateRight();
-
 			if(e.getKeyCode() == KeyEvent.VK_SHIFT) snapRotation = false;				//Release shit to stop snapping rotations
 		}
 	}
@@ -133,7 +127,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 			mouseX = e.getX();															//Dragged objects are automatically considered "selected"
 			mouseY = e.getY();
 
-			if(SwingUtilities.isLeftMouseButton(e)) {
+			if(SwingUtilities.isLeftMouseButton(e) && !rotation) {						//Drag with left mouse (move object)
 
 				if(selected == null) {
 					if(((JPanel)e.getSource()).getName().equals("panel")) {
@@ -171,20 +165,33 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					else selected.updateLocation(mouseX, mouseY);
 				}
 			}
-			else if(SwingUtilities.isRightMouseButton(e) && selected != null && selected.getType().equals("bond")) {
-				referencePos = e.getX()-startPos;
+			else if(SwingUtilities.isRightMouseButton(e) && selected != null && selected.getType().equals("bond")) {	//Drag with right mouse (rotate selected)
+				int referenceAxis = 0;																			//Axis to use sin with
+				double angle = 0;																				//Calculated angle
+				rotation = true;
 
-				if(snapRotation && Math.abs(referencePos)>=24) {
-					selected.rotate(30 * (referencePos/Math.abs(referencePos)));
-					startPos = e.getX();
+				int mouseX = (int) (e.getX() - (selected.getXPos()+selected.getWidth()/2));						//Set mouse coordinates relative to center of 
+				int mouseY = (int) (e.getY() - (selected.getYPos()+selected.getHeight()/2));					//selected as the origin
+
+				if((mouseX > 0 && mouseY > 0) || (mouseX < 0 && mouseY < 0)) referenceAxis = mouseX;			//Determine with axis to use as the "opposite"
+				else referenceAxis = mouseY;
+
+				angle = Math.toDegrees(Math.asin(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));	//opposite over hypotenuse
+
+				if(mouseX < 0 && mouseY < 0) angle += 90;				//Increase the angle based on which sector the mouse is in
+				else if(mouseX < 0 && mouseY > 0) {
+					angle += 180;
+					angle = -angle;
 				}
-				else if(!snapRotation) {
-					selected.rotate(referencePos);
-					startPos = e.getX();
+				else if(mouseX > 0 && mouseY > 0) {
+					angle += 270;
+					angle = -angle;
 				}
+
+				if(!snapRotation || (snapRotation && Math.abs((int)(angle)%30) == 0))		//Rotate, if snapRotation is on then rotate only every 30 degrees
+					selected.rotate(angle);
 			}
 		}
-
 
 		public void mouseMoved(MouseEvent e) {}
 	};
@@ -193,22 +200,24 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 	public void mousePressed(MouseEvent e) {			//Responsible for selecting an object, or deselecting if mouse is pressed in the void of space
 		Atom original = selected;
 
-		startPos = e.getX();
+		if(!rotation) {
+			if(((JPanel)e.getSource()).getName().equals("panel")) {
+				for(int i=0; i<atomList.size(); i++) {
+					Atom temp = atomList.get(i);
 
-		if(((JPanel)e.getSource()).getName().equals("panel")) {
-			for(int i=0; i<atomList.size(); i++) {
-				Atom temp = atomList.get(i);
-
-				if(e.getX()>temp.getXPos() && e.getX()<(temp.getXPos()+temp.getWidth()) && e.getY()>temp.getYPos() && e.getY()<(temp.getYPos()+temp.getHeight())) 
-					selected = temp;
+					if(e.getX()>temp.getXPos() && e.getX()<(temp.getXPos()+temp.getWidth()) && e.getY()>temp.getYPos() && e.getY()<(temp.getYPos()+temp.getHeight())) 
+						selected = temp;
+				}
+				if(!SwingUtilities.isRightMouseButton(e) && selected == original) selected = null;
 			}
-			if(!SwingUtilities.isRightMouseButton(e) && selected == original) selected = null;
+			else selected = null;
 		}
-		else selected = null;
 	}
 
-	public void mouseReleased(MouseEvent e) {		//Responsible for attaching objects and groups to each other once they have been "dropped"
-		if(selected != null) {
+	public void mouseReleased(MouseEvent e) {		
+		if(SwingUtilities.isRightMouseButton(e)) rotation = false;	//Stop rotation mode
+		
+		if(selected != null) {										//Responsible for attaching objects and groups to each other once they have been "dropped"
 			Atom temp = selected.objectCollision();
 
 			boolean connect = true;
@@ -321,10 +330,6 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					}
 
 					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
-
-					//System.out.println(Math.cos(selected.angle) + ", " + (temp.getWidth()/2) + ", " + (selected.getWidth()/2));
-					//System.out.println(direction);
-					//System.out.println(x + ", " + y + ", " + selected.angle + "\n");
 				}
 				else connect = false;
 
@@ -436,19 +441,17 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);	
 
-			g.drawString("This is a rotation demo", (width-240)/2, height/2);
+			if(rotation) g.drawString(Integer.toString((int)(Math.toDegrees(selected.angle))) + "\u00B0", mouseX+10, mouseY);
+
+			//g.drawString("This is a rotation demo", (width-240)/2, height/2);
 			g.drawString("Hold down right mouse and drag with a selected bond to rotate it", (width-240)/2, height/2+20);
 			g.drawString("Hold down shift while dragging to automatically snap to 30 degrees", (width-240)/2, height/2+40);
 
-			g.drawString("An effective collision detection and connection snapping system ", (width-240)/2, height/2+80);
-			g.drawString("is currently in the works", (width-240)/2, height/2+100);
+			//g.drawString("An effective collision detection and connection snapping system ", (width-240)/2, height/2+80);
+			//g.drawString("is currently in the works", (width-240)/2, height/2+100);
 
-			g.drawString("Added a new \"detach\" button to detach the selected atom from", (width-240)/2, height/2+140);
-			g.drawString("its group so that it can move freely", (width-240)/2, height/2+160);
-
-			g.drawString("Will improve this feature by making it so detaching an atom", (width-240)/2, height/2+200);
-			g.drawString("located in the centre of a group slipts the group instead of", (width-240)/2, height/2+220);
-			g.drawString("only detaching the one atom", (width-240)/2, height/2+240);
+			//g.drawString("Added a new \"detach\" button to detach the selected atom from", (width-240)/2, height/2+140);
+			//g.drawString("its group so that it can move freely", (width-240)/2, height/2+160);
 
 			for(int i=0; i<atomList.size(); i++)
 				atomList.get(i).draw(g);
