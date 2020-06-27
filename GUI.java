@@ -176,14 +176,17 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 				if((mouseX > 0 && mouseY > 0) || (mouseX < 0 && mouseY < 0)) referenceAxis = mouseY;			//Determine with axis to use as the "opposite"
 				else referenceAxis = mouseX;
 
-				angle = Math.toDegrees(Math.asin(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));	//opposite over hypotenuse
+				if(mouseX == 0 || mouseY == 0) 																//Use cos when one of the values is 0, use sin otherwise
+					angle = Math.toDegrees(Math.acos(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));
+				else 
+					angle = Math.toDegrees(Math.asin(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));	//opposite over hypotenuse
 
 				if(!(mouseX > 0)) angle = -angle;
 				
 				if(mouseX < 0 && mouseY > 0) angle += 90;
 				else if(mouseX < 0 && mouseY < 0) angle += 180;
 				else if(mouseX > 0 && mouseY < 0) angle += 270;
-				
+								
 				if(!snapRotation || (snapRotation && Math.abs((int)(angle)%30) == 0))		//Rotate, if snapRotation is on then rotate only every 30 degrees
 					selected.rotate(angle);
 			}
@@ -330,7 +333,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 						x = (Math.cos(tempAngle) * temp.getWidth()/2) + (Math.cos(tempAngle) * selected.getWidth()/2);
 						y = (Math.sin(tempAngle) * temp.getWidth()/2) + (Math.sin(tempAngle) * selected.getWidth()/2);
 					}
-										
+					
 					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
 				}
 				else connect = false;
