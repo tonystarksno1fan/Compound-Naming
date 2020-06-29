@@ -182,11 +182,11 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					angle = Math.toDegrees(Math.asin(referenceAxis / (Math.sqrt((Math.pow(mouseX, 2))+(Math.pow(mouseY, 2))))));	//opposite over hypotenuse
 
 				if(!(mouseX > 0)) angle = -angle;
-				
+
 				if(mouseX < 0 && mouseY > 0) angle += 90;
 				else if(mouseX < 0 && mouseY < 0) angle += 180;
 				else if(mouseX > 0 && mouseY < 0) angle += 270;
-								
+
 				if(!snapRotation || (snapRotation && Math.abs((int)(angle)%30) == 0))		//Rotate, if snapRotation is on then rotate only every 30 degrees
 					selected.rotate(angle);
 			}
@@ -215,9 +215,12 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 	public void mouseReleased(MouseEvent e) {		
 		if(SwingUtilities.isRightMouseButton(e)) rotation = false;	//Stop rotation mode
-		
+
 		if(selected != null) {										//Responsible for attaching objects and groups to each other once they have been "dropped"
-			Atom temp = selected.objectCollision();
+			Atom temp = selected.objectCollision(selected);
+
+			double originalX = selected.getXPos();					//Original X coordinate of selected before moving
+			double originalY = selected.getYPos();					//Original Y coordinate of selected before moving
 
 			boolean connect = true;
 
@@ -258,13 +261,13 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 					boolean left = false;						//Snapped to the left, meaning negative delta x
 					boolean up = false;							//Snapped up, meaning negative delta y
-					
+
 					double tempAngle = Math.toDegrees(temp.angle);				//Temporary angle used for calculating snap for Atoms to bonds
 
 					if(tempAngle > 180 && tempAngle < 270) tempAngle = Math.toRadians(tempAngle+180);		//Keep angles in sectors 1 and 2
 					else if(tempAngle > 90 && tempAngle < 180) tempAngle = Math.toRadians(tempAngle+180);
 					else tempAngle = Math.toRadians(tempAngle);
-					
+									
 					if(selected.getType().equals("bond")) {		//Snap settings for bonds
 
 						if(selected.angle == Math.PI || selected.angle == 0) {			//Check if bond should be snapped right or left relative to Atom
@@ -321,7 +324,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 					selected.updateLocation(selected.getXPos()+x, selected.getYPos()+y);		
 
 					//Move selected to edge of temp based on trig calculations
-					if(selected.getType().equals("bond")) {						
+					if(selected.getType().equals("bond")) {		
 						x = (Math.cos(selected.angle) * temp.getWidth()/2) + (Math.cos(selected.angle) * selected.getWidth()/2);
 						y = (Math.sin(selected.angle) * temp.getWidth()/2) + (Math.sin(selected.angle) * selected.getWidth()/2);
 
@@ -333,11 +336,17 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 						x = (Math.cos(tempAngle) * temp.getWidth()/2) + (Math.cos(tempAngle) * selected.getWidth()/2);
 						y = (Math.sin(tempAngle) * temp.getWidth()/2) + (Math.sin(tempAngle) * selected.getWidth()/2);
 					}
-					
+
 					selected.updateLocation(selected.getXPos()+x*direction, selected.getYPos()+y*direction);
 				}
 				else connect = false;
 
+				if(selected.objectCollision(temp) != null) {
+					selected.updateLocation(originalX, originalY);
+					
+					connect = false;
+				}
+				
 				//if selected component collides with another component on the screen 
 				if(connect) {
 					/*

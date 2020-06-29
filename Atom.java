@@ -109,13 +109,13 @@ public class Atom extends JPanel {
 		gg.dispose();
 	}
 
-	public Atom objectCollision() {							//Goes through atomList in GUI to check for a collision between Atom objects
+	public Atom objectCollision(Atom exception) {			//Goes through atomList in GUI to check for a collision between Atom objects, return if not exception
 		for(Atom temp : GUI.atomList) {
 			Area tempArea = new Area(temp.area);
-
+			
 			tempArea.intersect(area);
-
-			if(!tempArea.isEmpty() && temp!=this) 
+			
+			if((!tempArea.isEmpty() || (temp.lastX == lastX && temp.lastY == lastY)) && temp!=this && temp!=exception) 								
 				return temp;
 		}
 		return null;
@@ -145,7 +145,7 @@ public class Atom extends JPanel {
 
 	public void rotate(double angle) {
 		if(type.equals("atom")) return;								//Don't rotate atoms
-		
+
 		this.angle = Math.toRadians(angle);
 	}
 
