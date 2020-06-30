@@ -115,7 +115,7 @@ public class Atom extends JPanel {
 			
 			tempArea.intersect(area);
 			
-			if((!tempArea.isEmpty() || (temp.lastX == lastX && temp.lastY == lastY)) && temp!=this && temp!=exception) 								
+			if((!tempArea.isEmpty() || (temp.lastX == lastX && temp.lastY == lastY)) && temp!=this && temp!=exception && temp.group!=group) 								
 				return temp;
 		}
 		return null;
